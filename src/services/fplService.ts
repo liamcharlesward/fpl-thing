@@ -42,11 +42,12 @@ export async function fetchFplData(): Promise<FplDataResult> {
   let errorMsg: string | undefined;
 
   try {
+    // Request goes to Vite's dev proxy → fantasy.premierleague.com, avoiding CORS.
     const response = await fetch('/api/bootstrap-static/');
     if (!response.ok) {
       throw new Error(`FPL API responded with status ${response.status}`);
     }
-    data = await response.json();
+    data = await response.json() as FplBootstrapData;
     console.log('Successfully fetched live FPL data!');
   } catch (err) {
     console.warn('FPL API fetch failed, falling back to mock data:', err);
@@ -68,7 +69,7 @@ export async function fetchFplData(): Promise<FplDataResult> {
     const position = positionMap.get(el.element_type);
     const cost = el.now_cost / 10;
     const pointsPerGame = parseFloat(el.points_per_game) || 0;
-    
+
     return {
       id: el.id,
       firstName: el.first_name,
