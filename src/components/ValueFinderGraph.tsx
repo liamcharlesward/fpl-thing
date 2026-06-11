@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   ResponsiveContainer,
   ScatterChart,
@@ -7,13 +7,10 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
-  BarChart,
-  Bar,
-  Cell
+  Legend
 } from 'recharts';
 import type { ProcessedPlayer } from '../services/fplService';
-import { BarChart2, Compass } from 'lucide-react';
+import { Compass } from 'lucide-react';
 
 interface VisualizerGraphProps {
   players: ProcessedPlayer[];
@@ -21,14 +18,11 @@ interface VisualizerGraphProps {
   onSelectPlayer: (player: ProcessedPlayer) => void;
 }
 
-type GraphTab = 'scatter' | 'bar';
-
-export const VisualizerGraph: React.FC<VisualizerGraphProps> = ({
+export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({
   players,
   selectedPlayer,
   onSelectPlayer
 }) => {
-  const [activeTab, setActiveTab] = useState<GraphTab>('scatter');
 
   // Position color mapping
   const getPositionColor = (positionId: number) => {
@@ -73,49 +67,33 @@ export const VisualizerGraph: React.FC<VisualizerGraphProps> = ({
     return null;
   };
 
-  // Custom Bar Tooltip
-  const CustomBarTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const player: ProcessedPlayer = payload[0].payload;
-      return (
-        <div className="custom-chart-tooltip">
-          <div className="tooltip-player-name">{player.webName}</div>
-          <div className="tooltip-player-meta">
-            {player.teamName} • {player.positionName}
-          </div>
-          <div className="tooltip-stat-row">
-            <span>Points Per Game:</span>
-            <span className="tooltip-stat-val">{player.pointsPerGame.toFixed(1)}</span>
-          </div>
-          <div className="tooltip-stat-row">
-            <span>Total Points:</span>
-            <span>{player.totalPoints} pts</span>
-          </div>
-          <div className="tooltip-stat-row">
-            <span>Minutes Played:</span>
-            <span>{player.minutes} mins</span>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  // Top 12 players sorted by Points Per Game for the Bar Chart
-  const topPlayers = [...players]
-    .sort((a, b) => b.pointsPerGame - a.pointsPerGame)
-    .slice(0, 12);
-
   const handleScatterClick = (node: any) => {
     if (node && node.payload) {
       onSelectPlayer(node.payload);
     }
   };
 
-  const handleBarClick = (node: any) => {
-    if (node && node.payload) {
-      onSelectPlayer(node.payload);
-    }
+  const CustomPoint = (props: any) => {
+    const { cx, cy, payload } = props;
+
+    const isSelected = selectedPlayer?.id === payload.id;
+
+    return (
+      <circle
+        cx={cx}
+        cy={cy}
+        r={isSelected ? 4 : 3}
+        fill={getPositionColor(payload.positionId)}
+        stroke={isSelected ? '#fff' : 'rgba(0,0,0,0.3)'}
+        strokeWidth={isSelected ? 2 : 1}
+        style={{
+          transition: 'all 0.2s ease',
+          filter: isSelected
+            ? 'drop-shadow(0px 0px 8px var(--color-accent))'
+            : 'none',
+        }}
+      />
+    );
   };
 
   return (
@@ -123,38 +101,12 @@ export const VisualizerGraph: React.FC<VisualizerGraphProps> = ({
       <div className="chart-header">
         <div>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            {activeTab === 'scatter' ? (
-              <>
-                <Compass size={20} className="gradient-text-alt" />
-                Value Finder (Cost vs. PPG)
-              </>
-            ) : (
-              <>
-                <BarChart2 size={20} className="gradient-text" />
-                Top Performers (Points Per Game)
-              </>
-            )}
+            <Compass size={20} className="gradient-text-alt" />
+            Value Finder (Cost vs. PPG)
           </h3>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-            {activeTab === 'scatter'
-              ? 'Top-left players represent high-value targets (low cost, high PPG)'
-              : 'Top 12 players ordered by average points scored per match'}
+            Top-left players represent high-value targets (low cost, high PPG).
           </p>
-        </div>
-
-        <div className="chart-tabs">
-          <button
-            className={`chart-tab ${activeTab === 'scatter' ? 'active' : ''}`}
-            onClick={() => setActiveTab('scatter')}
-          >
-            Scatter Plot
-          </button>
-          <button
-            className={`chart-tab ${activeTab === 'bar' ? 'active' : ''}`}
-            onClick={() => setActiveTab('bar')}
-          >
-            Bar Chart
-          </button>
         </div>
       </div>
 
@@ -163,7 +115,7 @@ export const VisualizerGraph: React.FC<VisualizerGraphProps> = ({
           <div style={{ color: 'var(--text-muted)', textAlign: 'center' }}>
             No player data fits the current filters. Please broaden your filters.
           </div>
-        ) : activeTab === 'scatter' ? (
+        ) : (
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: -10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(168, 85, 247, 0.08)" />
@@ -192,24 +144,8 @@ export const VisualizerGraph: React.FC<VisualizerGraphProps> = ({
                 data={players}
                 onClick={handleScatterClick}
                 cursor="pointer"
-              >
-                {players.map((entry, index) => {
-                  const isSelected = selectedPlayer?.id === entry.id;
-                  return (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={getPositionColor(entry.positionId)}
-                      stroke={isSelected ? '#fff' : 'rgba(0,0,0,0.3)'}
-                      strokeWidth={isSelected ? 3 : 1}
-                      r={isSelected ? 11 : 6.5}
-                      style={{
-                        transition: 'all 0.2s ease',
-                        filter: isSelected ? 'drop-shadow(0px 0px 8px var(--color-accent))' : 'none'
-                      }}
-                    />
-                  );
-                })}
-              </Scatter>
+                shape={<CustomPoint />}
+              />
               <Legend
                 verticalAlign="top"
                 height={36}
@@ -235,51 +171,6 @@ export const VisualizerGraph: React.FC<VisualizerGraphProps> = ({
                 )}
               />
             </ScatterChart>
-          </ResponsiveContainer>
-        ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={topPlayers}
-              layout="vertical"
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(168, 85, 247, 0.08)" horizontal={false} />
-              <XAxis
-                type="number"
-                domain={[0, 'dataMax + 0.5']}
-                stroke="var(--text-muted)"
-                tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
-              />
-              <YAxis
-                type="category"
-                dataKey="webName"
-                stroke="var(--text-muted)"
-                tick={{ fill: '#f3f4f6', fontSize: 12, fontWeight: 500 }}
-                width={85}
-              />
-              <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(168, 85, 247, 0.05)' }} />
-              <Bar
-                dataKey="pointsPerGame"
-                radius={[0, 4, 4, 0]}
-                onClick={handleBarClick}
-                cursor="pointer"
-              >
-                {topPlayers.map((entry, index) => {
-                  const isSelected = selectedPlayer?.id === entry.id;
-                  return (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={isSelected ? 'var(--color-accent)' : getPositionColor(entry.positionId)}
-                      opacity={isSelected ? 1 : 0.8}
-                      style={{
-                        transition: 'all 0.2s ease',
-                        filter: isSelected ? 'drop-shadow(0px 0px 8px var(--color-accent))' : 'none'
-                      }}
-                    />
-                  );
-                })}
-              </Bar>
-            </BarChart>
           </ResponsiveContainer>
         )}
       </div>

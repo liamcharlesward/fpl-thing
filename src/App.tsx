@@ -2,10 +2,10 @@ import { useState, useEffect, useMemo } from 'react';
 import './App.css';
 import { DashboardHeader } from './components/DashboardHeader';
 import { Filters } from './components/Filters';
-import { VisualizerGraph } from './components/VisualizerGraph';
+import { ValueFinderGraph } from './components/ValueFinderGraph';
 import { PlayerTable } from './components/PlayerTable';
 import type { SortField, SortDirection } from './components/PlayerTable';
-import { PlayerDetailModal } from './components/PlayerDetailModal';
+import { PlayerDetailPanel } from './components/PlayerDetailPanel';
 import { fetchFplData } from './services/fplService';
 import type { ProcessedPlayer } from './services/fplService';
 import type { FplTeam, FplElementType } from './data/mockPlayers';
@@ -18,6 +18,7 @@ function App() {
   const [players, setPlayers] = useState<ProcessedPlayer[]>([]);
   const [teams, setTeams] = useState<FplTeam[]>([]);
   const [positions, setPositions] = useState<FplElementType[]>([]);
+  const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
 
   // Filter States
   const [search, setSearch] = useState('');
@@ -32,6 +33,10 @@ function App() {
 
   // Selected Player State
   const [selectedPlayer, setSelectedPlayer] = useState<ProcessedPlayer | null>(null);
+
+  const toggleFilters = () => {
+    setFiltersVisible(!filtersVisible);
+  }
 
   // Load initial data
   useEffect(() => {
@@ -189,8 +194,8 @@ function App() {
         <div className="notification-bar">
           <AlertTriangle size={18} style={{ flexShrink: 0 }} />
           <div>
-            <strong>Demo Mode Enabled:</strong> The official FPL API lacks cross-origin (CORS) headers and was unreachable from the browser. 
-            The app loaded a high-fidelity snapshot of Premier League players. 
+            <strong>Demo Mode Enabled:</strong> The official FPL API lacks cross-origin (CORS) headers and was unreachable from the browser.
+            The app loaded a high-fidelity snapshot of Premier League players.
             {errorMsg && <span style={{ opacity: 0.8, fontSize: '0.8rem', marginLeft: '0.5rem' }}>({errorMsg})</span>}
           </div>
         </div>
@@ -213,18 +218,26 @@ function App() {
         onReset={handleResetFilters}
         maxMinutesAvailable={maxMinutesInDataset}
         highestPriceAvailable={maxPriceInDataset}
+        visible={filtersVisible}
+        visibilityToggle={toggleFilters}
       />
+
+      <PlayerDetailPanel player={selectedPlayer} />
 
       {/* Main Grid: Visuals and Detail */}
       <div className="dashboard-grid">
         {/* Left Column: Visual Graph */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <VisualizerGraph
+          <ValueFinderGraph
             players={filteredPlayers}
             selectedPlayer={selectedPlayer}
             onSelectPlayer={setSelectedPlayer}
           />
-          
+        </div>
+
+        {/* Right Column: Sidebar Stats card */}
+        <div>
+
           {/* Player Leaderboard Table */}
           <PlayerTable
             players={sortedPlayers}
@@ -234,11 +247,6 @@ function App() {
             sortDirection={sortDirection}
             onSort={handleSort}
           />
-        </div>
-
-        {/* Right Column: Sidebar Stats card */}
-        <div>
-          <PlayerDetailModal player={selectedPlayer} />
         </div>
       </div>
     </div>
