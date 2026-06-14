@@ -10,6 +10,7 @@ import { fetchFplData } from './services/fplService';
 import type { ProcessedPlayer } from './services/fplService';
 import type { FplTeam, FplElementType } from './data/mockPlayers';
 import { Activity, AlertTriangle } from 'lucide-react';
+import { motion } from 'motion/react';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -36,6 +37,10 @@ function App() {
 
   const toggleFilters = () => {
     setFiltersVisible(!filtersVisible);
+  }
+
+  const hidePlayerDetailPanel = () => {
+    setSelectedPlayer(null);
   }
 
   // Load initial data
@@ -179,7 +184,7 @@ function App() {
   }
 
   return (
-    <div className="app-container">
+    <motion.div className="app-container" layout>
       {/* Header */}
       <DashboardHeader
         isMock={isMock}
@@ -222,7 +227,7 @@ function App() {
         visibilityToggle={toggleFilters}
       />
 
-      <PlayerDetailPanel player={selectedPlayer} />
+      <PlayerDetailPanel player={selectedPlayer} onClose={hidePlayerDetailPanel} />
 
       {/* Main Grid: Visuals and Detail */}
       <div className="dashboard-grid">
@@ -249,7 +254,7 @@ function App() {
           />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

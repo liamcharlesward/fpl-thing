@@ -102,10 +102,10 @@ export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({
         <div>
           <h3 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Compass size={20} className="gradient-text-alt" />
-            Value Finder (Cost vs. PPG)
+            Value Finder (Cost vs. Points per Match)
           </h3>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-            Top-left players represent high-value targets (low cost, high PPG).
+            Top-left players represent high-value targets (low cost, high points per match).
           </p>
         </div>
       </div>

@@ -1,7 +1,6 @@
 import React from 'react';
-import { Search, RotateCcw } from 'lucide-react';
+import { LuSearch, LuRotateCcw, LuChevronDown, LuChevronUp } from 'react-icons/lu';
 import type { FplTeam, FplElementType } from '../data/mockPlayers';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface FiltersProps {
@@ -45,28 +44,28 @@ export const Filters: React.FC<FiltersProps> = ({
 }) => {
   return (
     <motion.div className="glass-card">
-      <div className='filter-section'>
+      <div className='filter-section' style={{ justifyContent: 'space-between' }}>
         <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Filter & Refine</h3>
-        <div onClick={visibilityToggle} style={{ cursor: "pointer" }}>{visible ? <ChevronUp /> : <ChevronDown />}</div>
+        <div onClick={visibilityToggle} style={{ cursor: "pointer" }}>{visible ? <LuChevronUp /> : <LuChevronDown />}</div>
       </div>
       <AnimatePresence initial={visible}>
         {visible &&
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            initial={{ scaleY: 0, opacity: 0 }}
+            animate={{ scaleY: 1, opacity: 1 }}
+            exit={{ scaleY: 0, opacity: 0 }}
             transition={{
-              height: { duration: 0.25 },
-              opacity: { duration: 0.15 }
+              scaleY: { duration: 0.25 },
+              opacity: { duration: 0.25 }
             }}
-            style={{ overflow: 'hidden' }}
+            style={{ overflow: 'hidden', transformOrigin: 'top' }}
           >
             <div className="filter-section">
               <div className='custom-select-wrapper'>
                 {/* Search */}
                 <div className="search-input-wrapper">
                   <span className="search-icon">
-                    <Search size={18} />
+                    <LuSearch size={18} />
                   </span>
                   <input
                     type="text"
@@ -168,7 +167,7 @@ export const Filters: React.FC<FiltersProps> = ({
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <button className="reset-button" onClick={onReset}>
-                <RotateCcw size={14} />
+                <LuRotateCcw size={14} />
                 Reset Filters
               </button>
             </div>

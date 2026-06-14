@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { ProcessedPlayer } from '../services/fplService';
-import { ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LuArrowUpDown, LuArrowUp, LuArrowDown, LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 
 export type SortField = 'webName' | 'teamShort' | 'positionShort' | 'pointsPerGame' | 'totalPoints' | 'cost' | 'value';
 export type SortDirection = 'asc' | 'desc';
@@ -37,19 +37,19 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
 
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) {
-      return <ArrowUpDown size={12} style={{ marginLeft: 4, opacity: 0.5 }} />;
+      return <LuArrowUpDown size={12} style={{ marginLeft: 4, opacity: 0.5 }} />;
     }
     return sortDirection === 'asc'
-      ? <ArrowUp size={12} style={{ marginLeft: 4, color: 'var(--color-secondary)' }} />
-      : <ArrowDown size={12} style={{ marginLeft: 4, color: 'var(--color-secondary)' }} />;
+      ? <LuArrowUp size={12} style={{ marginLeft: 4, color: 'var(--color-secondary)' }} />
+      : <LuArrowDown size={12} style={{ marginLeft: 4, color: 'var(--color-secondary)' }} />;
   };
 
   const getPositionBadgeStyle = (posShort: string) => {
     switch (posShort) {
-      case 'GKP': return { color: 'var(--color-secondary)', background: 'rgba(6, 182, 212, 0.1)' };
-      case 'DEF': return { color: 'var(--color-success)', background: 'rgba(16, 185, 129, 0.1)' };
-      case 'MID': return { color: 'var(--color-primary)', background: 'rgba(168, 85, 247, 0.1)' };
-      case 'FWD': return { color: 'var(--color-accent)', background: 'rgba(236, 72, 153, 0.1)' };
+      case 'GKP': return { color: 'var(--color-secondary)', background: 'var(--color-secondary-bg)' };
+      case 'DEF': return { color: 'var(--color-success)', background: 'var(--color-success-bg)' };
+      case 'MID': return { color: 'var(--color-primary)', background: 'var(--color-primary-bg)' };
+      case 'FWD': return { color: 'var(--color-accent)', background: 'var(--color-accent-bg)' };
       default: return {};
     }
   };
@@ -97,7 +97,7 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
                   Pos {renderSortIcon('positionShort')}
                 </th>
                 <th onClick={() => onSort('pointsPerGame')} style={{ textAlign: 'right' }}>
-                  PPG {renderSortIcon('pointsPerGame')}
+                  Pts per Match {renderSortIcon('pointsPerGame')}
                 </th>
                 <th onClick={() => onSort('cost')} style={{ textAlign: 'right' }}>
                   Price {renderSortIcon('cost')}
@@ -175,7 +175,7 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
               disabled={page === 1}
               aria-label="Previous page"
             >
-              <ChevronLeft size={15} />
+              <LuChevronLeft size={15} />
             </button>
 
             {buildPageNumbers().map((item, i) =>
@@ -198,7 +198,7 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
               disabled={page === totalPages}
               aria-label="Next page"
             >
-              <ChevronRight size={15} />
+              <LuChevronRight size={15} />
             </button>
           </div>
         </div>
