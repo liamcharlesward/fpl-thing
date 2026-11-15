@@ -1,11 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import type { ProcessedPlayer } from '../services/fplService';
-import { LuArrowUpDown, LuArrowUp, LuArrowDown, LuChevronLeft, LuChevronRight } from 'react-icons/lu';
+import React, { useState, useEffect } from "react";
+import type { ProcessedPlayer } from "../services/FplBootstrapService";
+import { LuArrowUpDown, LuArrowUp, LuArrowDown, LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { Badge } from "./Badge";
 
-export type SortField = 'webName' | 'teamShort' | 'positionShort' | 'pointsPerGame' | 'totalPoints' | 'cost' | 'value';
-export type SortDirection = 'asc' | 'desc';
+export type SortField =
+  | "webName"
+  | "teamShort"
+  | "positionShort"
+  | "pointsPerMatch"
+  | "totalPoints"
+  | "cost"
+  | "pointsPerMillion"
+  | "pointsPerMatchPerMil";
+export type SortDirection = "asc" | "desc";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 25;
 
 interface PlayerTableProps {
   players: ProcessedPlayer[];
@@ -22,13 +31,14 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
   onSelectPlayer,
   sortField,
   sortDirection,
-  onSort
+  onSort,
 }) => {
   const [page, setPage] = useState(1);
 
   // Reset to page 1 whenever the underlying player list changes (filter / sort)
   useEffect(() => {
-    setPage(1);
+    const id = window.setTimeout(() => setPage(1), 0);
+    return () => clearTimeout(id);
   }, [players]);
 
   const totalPages = Math.max(1, Math.ceil(players.length / PAGE_SIZE));
@@ -39,74 +49,76 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
     if (sortField !== field) {
       return <LuArrowUpDown size={12} style={{ marginLeft: 4, opacity: 0.5 }} />;
     }
-    return sortDirection === 'asc'
-      ? <LuArrowUp size={12} style={{ marginLeft: 4, color: 'var(--color-secondary)' }} />
-      : <LuArrowDown size={12} style={{ marginLeft: 4, color: 'var(--color-secondary)' }} />;
+    return sortDirection === "asc" ? (
+      <LuArrowUp size={12} style={{ marginLeft: 4, color: "var(--color-secondary)" }} />
+    ) : (
+      <LuArrowDown size={12} style={{ marginLeft: 4, color: "var(--color-secondary)" }} />
+    );
   };
 
   const getPositionBadgeStyle = (posShort: string) => {
     switch (posShort) {
-      case 'GKP': return { color: 'var(--color-secondary)', background: 'var(--color-secondary-bg)' };
-      case 'DEF': return { color: 'var(--color-success)', background: 'var(--color-success-bg)' };
-      case 'MID': return { color: 'var(--color-primary)', background: 'var(--color-primary-bg)' };
-      case 'FWD': return { color: 'var(--color-accent)', background: 'var(--color-accent-bg)' };
-      default: return {};
+      case "GKP":
+        return { color: "var(--color-secondary)", background: "var(--color-secondary-bg)" };
+      case "DEF":
+        return { color: "var(--color-success)", background: "var(--color-success-bg)" };
+      case "MID":
+        return { color: "var(--color-primary)", background: "var(--color-primary-bg)" };
+      case "FWD":
+        return { color: "var(--color-accent)", background: "var(--color-accent-bg)" };
+      default:
+        return {};
     }
   };
 
   /** Build the list of page numbers / ellipsis tokens to display. */
-  const buildPageNumbers = (): (number | '…')[] => {
+  const buildPageNumbers = (): (number | "…")[] => {
     if (totalPages <= 7) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
-    const pages: (number | '…')[] = [1];
-    if (page > 3) pages.push('…');
+    const pages: (number | "…")[] = [1];
+    if (page > 3) pages.push("…");
     for (let p = Math.max(2, page - 1); p <= Math.min(totalPages - 1, page + 1); p++) {
       pages.push(p);
     }
-    if (page < totalPages - 2) pages.push('…');
+    if (page < totalPages - 2) pages.push("…");
     pages.push(totalPages);
     return pages;
   };
 
   return (
-    <div className="glass-card flex flex-col gap-4" style={{ overflow: 'hidden' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Player Leaderboard</h3>
-        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          {players.length} players
-        </span>
+    <div className="glass-card flex flex-col gap-4" style={{ overflow: "hidden" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h3 style={{ fontSize: "1.1rem", fontWeight: 700 }}>Player Leaderboard</h3>
+        <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>{players.length} players</span>
       </div>
 
       <div className="table-area">
         {players.length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+          <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-muted)" }}>
             No players match the criteria
           </div>
         ) : (
           <table className="players-table">
             <thead>
               <tr>
-                <th onClick={() => onSort('webName')}>
-                  Player {renderSortIcon('webName')}
+                <th onClick={() => onSort("webName")}>Player {renderSortIcon("webName")}</th>
+                <th onClick={() => onSort("teamShort")}>Team {renderSortIcon("teamShort")}</th>
+                <th onClick={() => onSort("positionShort")}>Pos {renderSortIcon("positionShort")}</th>
+                <th onClick={() => onSort("pointsPerMatch")} style={{ textAlign: "right" }}>
+                  Pts per Match {renderSortIcon("pointsPerMatch")}
                 </th>
-                <th onClick={() => onSort('teamShort')}>
-                  Team {renderSortIcon('teamShort')}
+                <th onClick={() => onSort("cost")} style={{ textAlign: "right" }}>
+                  Price {renderSortIcon("cost")}
                 </th>
-                <th onClick={() => onSort('positionShort')}>
-                  Pos {renderSortIcon('positionShort')}
+                <th onClick={() => onSort("totalPoints")} style={{ textAlign: "right" }}>
+                  Total Pts {renderSortIcon("totalPoints")}
                 </th>
-                <th onClick={() => onSort('pointsPerGame')} style={{ textAlign: 'right' }}>
-                  Pts per Match {renderSortIcon('pointsPerGame')}
+                <th onClick={() => onSort("pointsPerMillion")} style={{ textAlign: "right" }}>
+                  Pts per Million {renderSortIcon("pointsPerMillion")}
                 </th>
-                <th onClick={() => onSort('cost')} style={{ textAlign: 'right' }}>
-                  Price {renderSortIcon('cost')}
-                </th>
-                <th onClick={() => onSort('totalPoints')} style={{ textAlign: 'right' }}>
-                  Total Pts {renderSortIcon('totalPoints')}
-                </th>
-                <th onClick={() => onSort('value')} style={{ textAlign: 'right' }}>
-                  Pts per Million {renderSortIcon('value')}
+                <th onClick={() => onSort("pointsPerMatchPerMil")} style={{ textAlign: "right" }}>
+                  PPM/£Mil {renderSortIcon("pointsPerMatchPerMil")}
                 </th>
               </tr>
             </thead>
@@ -116,43 +128,45 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
                 return (
                   <tr
                     key={p.id}
-                    className={isSelected ? 'selected' : ''}
+                    className={isSelected ? "selected" : ""}
                     onClick={() => onSelectPlayer(p)}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: "pointer" }}
                   >
-                    {p.webName == p.lastName
-                      ? <td>{p.firstName}<span style={{ fontWeight: 600 }}> {p.lastName}</span></td>
-                      : <td style={{ fontWeight: 600 }}>{p.webName}</td>
-                    }
+                    {p.webName == p.lastName ? (
+                      <td>
+                        {p.firstName}
+                        <span style={{ fontWeight: 600 }}> {p.lastName}</span>
+                      </td>
+                    ) : (
+                      <td style={{ fontWeight: 600 }}>{p.webName}</td>
+                    )}
                     <td>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                        {p.teamShort}
-                      </span>
+                      <Badge text={p.teamShort} colour={p.teamShort.toLowerCase()} />
                     </td>
                     <td>
+                      {/* TODO: Replace with badge */}
                       <span
                         style={{
-                          fontSize: '0.75rem',
+                          fontSize: "0.75rem",
                           fontWeight: 700,
-                          padding: '0.15rem 0.4rem',
+                          padding: "0.15rem 0.4rem",
                           borderRadius: 4,
-                          ...getPositionBadgeStyle(p.positionShort)
+                          ...getPositionBadgeStyle(p.positionShort),
                         }}
                       >
                         {p.positionShort}
                       </span>
                     </td>
-                    <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--color-secondary)' }}>
-                      {p.pointsPerGame.toFixed(1)}
+                    <td style={{ textAlign: "right", fontWeight: 700, color: "var(--color-secondary)" }}>
+                      {p.pointsPerMatch.toFixed(1)}
                     </td>
-                    <td style={{ textAlign: 'right', fontWeight: 600 }}>
-                      £{p.cost.toFixed(1)}m
+                    <td style={{ textAlign: "right", fontWeight: 600 }}>£{p.cost.toFixed(1)}m</td>
+                    <td style={{ textAlign: "right" }}>{p.totalPoints}</td>
+                    <td style={{ textAlign: "right", fontWeight: 600, color: "var(--color-accent)" }}>
+                      {p.pointsPerMillion.toFixed(1)}
                     </td>
-                    <td style={{ textAlign: 'right' }}>
-                      {p.totalPoints}
-                    </td>
-                    <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--color-accent)' }}>
-                      {p.value.toFixed(1)}
+                    <td style={{ textAlign: "right", fontWeight: 600, color: "var(--color-accent)" }}>
+                      {p.pointsPerMatchPerMil.toString()}
                     </td>
                   </tr>
                 );
@@ -179,17 +193,19 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
             </button>
 
             {buildPageNumbers().map((item, i) =>
-              item === '…' ? (
-                <span key={`ellipsis-${i}`} className="page-btn ellipsis">…</span>
+              item === "…" ? (
+                <span key={`ellipsis-${i}`} className="page-btn ellipsis">
+                  …
+                </span>
               ) : (
                 <button
                   key={item}
-                  className={`page-btn${page === item ? ' active' : ''}`}
+                  className={`page-btn${page === item ? " active" : ""}`}
                   onClick={() => setPage(item as number)}
                 >
                   {item}
                 </button>
-              )
+              ),
             )}
 
             <button

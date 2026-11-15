@@ -1,16 +1,18 @@
-import { useState, useEffect, useMemo } from 'react';
-import './App.css';
-import { DashboardHeader } from './components/DashboardHeader';
-import { Filters } from './components/Filters';
-import { ValueFinderGraph } from './components/ValueFinderGraph';
-import { PlayerTable } from './components/PlayerTable';
-import type { SortField, SortDirection } from './components/PlayerTable';
-import { PlayerDetailPanel } from './components/PlayerDetailPanel';
-import { fetchFplData } from './services/fplService';
-import type { ProcessedPlayer } from './services/fplService';
-import type { FplTeam, FplElementType } from './data/mockPlayers';
-import { Activity, AlertTriangle } from 'lucide-react';
-import { motion } from 'motion/react';
+import { useState, useEffect, useMemo } from "react";
+import "./App.css";
+import { DashboardHeader } from "./components/DashboardHeader";
+import { Filters } from "./components/Filters";
+import { ValueFinderGraph } from "./components/ValueFinderGraph";
+import { PlayerTable } from "./components/PlayerTable";
+import type { SortField, SortDirection } from "./components/PlayerTable";
+import { fetchBootstrapData } from "./services/FplBootstrapService";
+import { fetchHistoryData } from "./services/FplHistoryService";
+import type { ProcessedPlayer } from "./services/FplBootstrapService";
+import type { FplTeam, FplElementType } from "./services/FplBootstrapService";
+import { Activity, AlertTriangle } from "lucide-react";
+import { motion } from "motion/react";
+import { Sidebar } from "./components/Sidebar";
+import type { FplHistory } from "./services/FplHistoryService";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -22,33 +24,30 @@ function App() {
   const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
 
   // Filter States
-  const [search, setSearch] = useState('');
-  const [selectedTeam, setSelectedTeam] = useState<number | 'all'>('all');
-  const [selectedPosition, setSelectedPosition] = useState<number | 'all'>('all');
+  const [search, setSearch] = useState("");
+  const [selectedTeam, setSelectedTeam] = useState<number | "all">("all");
+  const [selectedPosition, setSelectedPosition] = useState<number | "all">("all");
   const [minMinutes, setMinMinutes] = useState(0);
   const [maxPrice, setMaxPrice] = useState(16.0);
 
   // Sorting States
-  const [sortField, setSortField] = useState<SortField>('pointsPerGame');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sortField, setSortField] = useState<SortField>("pointsPerMatchPerMil");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   // Selected Player State
   const [selectedPlayer, setSelectedPlayer] = useState<ProcessedPlayer | null>(null);
+  const [playerHistoryData, setPlayerHistoryData] = useState<FplHistory[] | null>(null);
 
   const toggleFilters = () => {
     setFiltersVisible(!filtersVisible);
-  }
-
-  const hidePlayerDetailPanel = () => {
-    setSelectedPlayer(null);
-  }
+  };
 
   // Load initial data
   useEffect(() => {
     async function loadData() {
       setLoading(true);
       try {
-        const result = await fetchFplData();
+        const result = await fetchBootstrapData();
         setPlayers(result.players);
         setTeams(result.teams);
         setPositions(result.positions);
@@ -59,9 +58,11 @@ function App() {
         if (result.players.length > 0) {
           const maxP = Math.max(...result.players.map((p) => p.cost));
           setMaxPrice(maxP);
+        } else {
+          setSelectedPlayer(null);
         }
       } catch (err) {
-        console.error('Failed to load data in App', err);
+        console.error("Failed to load data in App", err);
       } finally {
         setLoading(false);
       }
@@ -82,9 +83,9 @@ function App() {
 
   // Reset Filters Handler
   const handleResetFilters = () => {
-    setSearch('');
-    setSelectedTeam('all');
-    setSelectedPosition('all');
+    setSearch("");
+    setSelectedTeam("all");
+    setSelectedPosition("all");
     setMinMinutes(0);
     setMaxPrice(maxPriceInDataset);
   };
@@ -92,11 +93,34 @@ function App() {
   // Sort Handler
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
       setSortField(field);
-      setSortDirection('desc'); // Default to descending for new sort column
+      setSortDirection("desc"); // Default to descending for new sort column
     }
+  };
+
+  const handlePlayerHistory = async (player: ProcessedPlayer) => {
+    try {
+      const { history } = await fetchHistoryData(player.id);
+
+      if (Array.isArray(history)) {
+        setPlayerHistoryData(history);
+      } else {
+        setPlayerHistoryData(null);
+      }
+
+      setSelectedPlayer(player);
+    } catch (err) {
+      console.warn("Player historical stats unavailable", err);
+      setPlayerHistoryData(null);
+      setSelectedPlayer(player);
+    }
+  };
+
+  const clearPlayerAndHistory = () => {
+    setSelectedPlayer(null);
+    setPlayerHistoryData(null);
   };
 
   // Filtered Players
@@ -104,16 +128,16 @@ function App() {
     return players.filter((player) => {
       // Name search
       const nameMatch =
-        search.trim() === '' ||
+        search.trim() === "" ||
         player.webName.toLowerCase().includes(search.toLowerCase()) ||
         player.firstName.toLowerCase().includes(search.toLowerCase()) ||
         player.lastName.toLowerCase().includes(search.toLowerCase());
 
       // Team filter
-      const teamMatch = selectedTeam === 'all' || player.teamId === selectedTeam;
+      const teamMatch = selectedTeam === "all" || player.teamId === selectedTeam;
 
       // Position filter
-      const posMatch = selectedPosition === 'all' || player.positionId === selectedPosition;
+      const posMatch = selectedPosition === "all" || player.positionId === selectedPosition;
 
       // Minutes filter
       const minMatch = player.minutes >= minMinutes;
@@ -132,17 +156,15 @@ function App() {
       let valB = b[sortField];
 
       // Handle string comparisons
-      if (typeof valA === 'string' && typeof valB === 'string') {
-        return sortDirection === 'asc'
-          ? valA.localeCompare(valB)
-          : valB.localeCompare(valA);
+      if (typeof valA === "string" && typeof valB === "string") {
+        return sortDirection === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
       }
 
       // Handle numeric comparisons
       valA = Number(valA) || 0;
       valB = Number(valB) || 0;
 
-      return sortDirection === 'asc' ? valA - valB : valB - valA;
+      return sortDirection === "asc" ? valA - valB : valB - valA;
     });
   }, [filteredPlayers, sortField, sortDirection]);
 
@@ -150,9 +172,9 @@ function App() {
   const stats = useMemo(() => {
     if (filteredPlayers.length === 0) {
       return {
-        highestPpgName: 'N/A',
+        highestPpgName: "N/A",
         highestPpgValue: 0,
-        avgPpg: 0
+        avgPpg: 0,
       };
     }
 
@@ -160,101 +182,111 @@ function App() {
     let totalPpg = 0;
 
     filteredPlayers.forEach((p) => {
-      totalPpg += p.pointsPerGame;
-      if (p.pointsPerGame > highest.pointsPerGame) {
+      totalPpg += p.pointsPerMatch;
+      if (p.pointsPerMatch > highest.pointsPerMatch) {
         highest = p;
       }
     });
 
     return {
       highestPpgName: highest.webName,
-      highestPpgValue: highest.pointsPerGame,
-      avgPpg: totalPpg / filteredPlayers.length
+      highestPpgValue: highest.pointsPerMatch,
+      avgPpg: totalPpg / filteredPlayers.length,
     };
   }, [filteredPlayers]);
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>
-        <Activity size={48} className="gradient-text-alt" style={{ animation: 'spin 2s linear infinite' }} />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "1rem",
+        }}
+      >
+        <Activity size={48} className="gradient-text-alt" style={{ animation: "spin 2s linear infinite" }} />
         <h3 style={{ fontWeight: 600 }}>Loading FPL Player Data...</h3>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Fetching stats and rendering visualizations</p>
+        <p style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>Fetching stats and rendering visualizations</p>
       </div>
     );
   }
 
   return (
-    <motion.div className="app-container" layout>
-      {/* Header */}
-      <DashboardHeader
-        isMock={isMock}
-        totalCount={filteredPlayers.length}
-        highestPpgName={stats.highestPpgName}
-        highestPpgValue={stats.highestPpgValue}
-        avgPpg={stats.avgPpg}
-      />
+    <>
+      <motion.div className="app-container" layout>
+        {/* Header */}
+        <DashboardHeader
+          isMock={isMock}
+          totalCount={filteredPlayers.length}
+          highestPpgName={stats.highestPpgName}
+          highestPpgValue={stats.highestPpgValue}
+          avgPpg={stats.avgPpg}
+        />
 
-      {/* Warning banner for CORS fallback */}
-      {isMock && (
-        <div className="notification-bar">
-          <AlertTriangle size={18} style={{ flexShrink: 0 }} />
+        {/* Warning banner for CORS fallback */}
+        {isMock && (
+          <div className="notification-bar">
+            <AlertTriangle size={18} style={{ flexShrink: 0 }} />
+            <div>
+              <strong>Demo Mode Enabled:</strong> The official FPL API lacks cross-origin (CORS) headers and was
+              unreachable from the browser. The app loaded a high-fidelity snapshot of Premier League players.
+              {errorMsg && <span style={{ opacity: 0.8, fontSize: "0.8rem", marginLeft: "0.5rem" }}>({errorMsg})</span>}
+            </div>
+          </div>
+        )}
+
+        {/* Filter Options*/}
+        {/* TODO: RE-work filter UI */}
+        <Filters
+          search={search}
+          setSearch={setSearch}
+          selectedTeam={selectedTeam}
+          setSelectedTeam={setSelectedTeam}
+          selectedPosition={selectedPosition}
+          setSelectedPosition={setSelectedPosition}
+          minMinutes={minMinutes}
+          setMinMinutes={setMinMinutes}
+          maxPrice={maxPrice}
+          setMaxPrice={setMaxPrice}
+          teams={teams}
+          positions={positions}
+          onReset={handleResetFilters}
+          maxMinutesAvailable={maxMinutesInDataset}
+          highestPriceAvailable={maxPriceInDataset}
+          visible={filtersVisible}
+          visibilityToggle={toggleFilters}
+        />
+
+        {/* Main Grid: Visuals and Detail */}
+        <div className="dashboard-grid">
+          {/* Left Column: Visual Graph */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            <ValueFinderGraph
+              players={filteredPlayers}
+              selectedPlayer={selectedPlayer}
+              onSelectPlayer={handlePlayerHistory}
+            />
+          </div>
+
+          {/* Right Column: Sidebar Stats card */}
           <div>
-            <strong>Demo Mode Enabled:</strong> The official FPL API lacks cross-origin (CORS) headers and was unreachable from the browser.
-            The app loaded a high-fidelity snapshot of Premier League players.
-            {errorMsg && <span style={{ opacity: 0.8, fontSize: '0.8rem', marginLeft: '0.5rem' }}>({errorMsg})</span>}
+            {/* Player Leaderboard Table */}
+            <PlayerTable
+              players={sortedPlayers}
+              selectedPlayer={selectedPlayer}
+              onSelectPlayer={handlePlayerHistory}
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={handleSort}
+            />
           </div>
         </div>
-      )}
-
-      {/* Filter Options */}
-      <Filters
-        search={search}
-        setSearch={setSearch}
-        selectedTeam={selectedTeam}
-        setSelectedTeam={setSelectedTeam}
-        selectedPosition={selectedPosition}
-        setSelectedPosition={setSelectedPosition}
-        minMinutes={minMinutes}
-        setMinMinutes={setMinMinutes}
-        maxPrice={maxPrice}
-        setMaxPrice={setMaxPrice}
-        teams={teams}
-        positions={positions}
-        onReset={handleResetFilters}
-        maxMinutesAvailable={maxMinutesInDataset}
-        highestPriceAvailable={maxPriceInDataset}
-        visible={filtersVisible}
-        visibilityToggle={toggleFilters}
-      />
-
-      <PlayerDetailPanel player={selectedPlayer} onClose={hidePlayerDetailPanel} />
-
-      {/* Main Grid: Visuals and Detail */}
-      <div className="dashboard-grid">
-        {/* Left Column: Visual Graph */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <ValueFinderGraph
-            players={filteredPlayers}
-            selectedPlayer={selectedPlayer}
-            onSelectPlayer={setSelectedPlayer}
-          />
-        </div>
-
-        {/* Right Column: Sidebar Stats card */}
-        <div>
-
-          {/* Player Leaderboard Table */}
-          <PlayerTable
-            players={sortedPlayers}
-            selectedPlayer={selectedPlayer}
-            onSelectPlayer={setSelectedPlayer}
-            sortField={sortField}
-            sortDirection={sortDirection}
-            onSort={handleSort}
-          />
-        </div>
-      </div>
-    </motion.div>
+      </motion.div>
+      <Sidebar selectedPlayer={selectedPlayer} playerHistory={playerHistoryData} onClose={clearPlayerAndHistory} />
+    </>
   );
 }
 

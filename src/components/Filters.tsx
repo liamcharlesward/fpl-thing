@@ -1,15 +1,15 @@
-import React from 'react';
-import { LuSearch, LuRotateCcw, LuChevronDown, LuChevronUp } from 'react-icons/lu';
-import type { FplTeam, FplElementType } from '../data/mockPlayers';
-import { motion, AnimatePresence } from 'motion/react';
+import React from "react";
+import { LuSearch, LuRotateCcw, LuChevronDown, LuChevronUp } from "react-icons/lu";
+import type { FplTeam, FplElementType } from "../data/ApiDataTypes";
+import { motion, AnimatePresence } from "motion/react";
 
 interface FiltersProps {
   search: string;
   setSearch: (val: string) => void;
-  selectedTeam: number | 'all';
-  setSelectedTeam: (val: number | 'all') => void;
-  selectedPosition: number | 'all';
-  setSelectedPosition: (val: number | 'all') => void;
+  selectedTeam: number | "all";
+  setSelectedTeam: (val: number | "all") => void;
+  selectedPosition: number | "all";
+  setSelectedPosition: (val: number | "all") => void;
   minMinutes: number;
   setMinMinutes: (val: number) => void;
   maxPrice: number;
@@ -44,24 +44,26 @@ export const Filters: React.FC<FiltersProps> = ({
 }) => {
   return (
     <motion.div className="glass-card">
-      <div className='filter-section' style={{ justifyContent: 'space-between' }}>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Filter & Refine</h3>
-        <div onClick={visibilityToggle} style={{ cursor: "pointer" }}>{visible ? <LuChevronUp /> : <LuChevronDown />}</div>
+      <div className="filter-section" style={{ justifyContent: "space-between" }}>
+        <h3 style={{ fontSize: "1.1rem", fontWeight: 700 }}>Filter & Refine</h3>
+        <div onClick={visibilityToggle} style={{ cursor: "pointer" }}>
+          {visible ? <LuChevronUp /> : <LuChevronDown />}
+        </div>
       </div>
       <AnimatePresence initial={visible}>
-        {visible &&
+        {visible && (
           <motion.div
             initial={{ scaleY: 0, opacity: 0 }}
             animate={{ scaleY: 1, opacity: 1 }}
             exit={{ scaleY: 0, opacity: 0 }}
             transition={{
               scaleY: { duration: 0.25 },
-              opacity: { duration: 0.25 }
+              opacity: { duration: 0.25 },
             }}
-            style={{ overflow: 'hidden', transformOrigin: 'top' }}
+            style={{ overflow: "hidden", transformOrigin: "top" }}
           >
             <div className="filter-section">
-              <div className='custom-select-wrapper'>
+              <div className="custom-select-wrapper">
                 {/* Search */}
                 <div className="search-input-wrapper">
                   <span className="search-icon">
@@ -84,7 +86,7 @@ export const Filters: React.FC<FiltersProps> = ({
                   value={selectedTeam}
                   onChange={(e) => {
                     const val = e.target.value;
-                    setSelectedTeam(val === 'all' ? 'all' : parseInt(val));
+                    setSelectedTeam(val === "all" ? "all" : parseInt(val));
                   }}
                 >
                   <option value="all">All Teams</option>
@@ -100,15 +102,15 @@ export const Filters: React.FC<FiltersProps> = ({
               <div className="custom-select-wrapper">
                 <div className="pills-container">
                   <button
-                    className={`pill-button ${selectedPosition === 'all' ? 'active' : ''}`}
-                    onClick={() => setSelectedPosition('all')}
+                    className={`pill-button ${selectedPosition === "all" ? "active" : ""}`}
+                    onClick={() => setSelectedPosition("all")}
                   >
                     All
                   </button>
                   {positions.map((p) => (
                     <button
                       key={p.id}
-                      className={`pill-button ${selectedPosition === p.id ? 'active' : ''}`}
+                      className={`pill-button ${selectedPosition === p.id ? "active" : ""}`}
                       onClick={() => setSelectedPosition(p.id)}
                     >
                       {p.singular_name_short}
@@ -118,14 +120,15 @@ export const Filters: React.FC<FiltersProps> = ({
               </div>
             </div>
 
-            <div className="filter-section" style={{ borderTop: '1px solid var(--border-light)', paddingTop: '1.25rem' }}>
+            <div
+              className="filter-section"
+              style={{ borderTop: "1px solid var(--border-light)", paddingTop: "1.25rem" }}
+            >
               {/* Minutes Slider */}
               <div className="range-slider-wrapper">
                 <div className="custom-label">
                   <span>Min Minutes Played</span>
-                  <span style={{ color: 'var(--color-secondary)', fontWeight: 700 }}>
-                    {minMinutes} mins
-                  </span>
+                  <span style={{ color: "var(--color-secondary)", fontWeight: 700 }}>{minMinutes} mins</span>
                 </div>
                 <input
                   type="range"
@@ -136,7 +139,14 @@ export const Filters: React.FC<FiltersProps> = ({
                   value={minMinutes}
                   onChange={(e) => setMinMinutes(parseInt(e.target.value))}
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: "0.75rem",
+                    color: "var(--text-muted)",
+                  }}
+                >
                   <span>0</span>
                   <span>{maxMinutesAvailable} mins</span>
                 </div>
@@ -146,9 +156,7 @@ export const Filters: React.FC<FiltersProps> = ({
               <div className="range-slider-wrapper">
                 <div className="custom-label">
                   <span>Max Price (£)</span>
-                  <span style={{ color: 'var(--color-accent)', fontWeight: 700 }}>
-                    £{maxPrice.toFixed(1)}m
-                  </span>
+                  <span style={{ color: "var(--color-accent)", fontWeight: 700 }}>£{maxPrice.toFixed(1)}m</span>
                 </div>
                 <input
                   type="range"
@@ -159,20 +167,27 @@ export const Filters: React.FC<FiltersProps> = ({
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(parseFloat(e.target.value))}
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: "0.75rem",
+                    color: "var(--text-muted)",
+                  }}
+                >
                   <span>£4.0m</span>
                   <span>£{highestPriceAvailable.toFixed(1)}m</span>
                 </div>
               </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <button className="reset-button" onClick={onReset}>
                 <LuRotateCcw size={14} />
                 Reset Filters
               </button>
             </div>
           </motion.div>
-        }
+        )}
       </AnimatePresence>
     </motion.div>
   );

@@ -1,16 +1,7 @@
-import React from 'react';
-import {
-  ResponsiveContainer,
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend
-} from 'recharts';
-import type { ProcessedPlayer } from '../services/fplService';
-import { Compass } from 'lucide-react';
+import React from "react";
+import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import type { ProcessedPlayer } from "../services/FplBootstrapService";
+import { Compass } from "lucide-react";
 
 interface VisualizerGraphProps {
   players: ProcessedPlayer[];
@@ -18,20 +9,22 @@ interface VisualizerGraphProps {
   onSelectPlayer: (player: ProcessedPlayer) => void;
 }
 
-export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({
-  players,
-  selectedPlayer,
-  onSelectPlayer
-}) => {
+// TODO: Fix explicit anys!
 
+export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({ players, selectedPlayer, onSelectPlayer }) => {
   // Position color mapping
   const getPositionColor = (positionId: number) => {
     switch (positionId) {
-      case 1: return 'var(--color-secondary)'; // GK - Cyan
-      case 2: return 'var(--color-success)';   // DEF - Emerald
-      case 3: return 'var(--color-primary)';   // MID - Purple
-      case 4: return 'var(--color-accent)';    // FWD - Pink
-      default: return '#9ca3af';
+      case 1:
+        return "var(--color-secondary)"; // GK - Cyan
+      case 2:
+        return "var(--color-success)"; // DEF - Emerald
+      case 3:
+        return "var(--color-primary)"; // MID - Purple
+      case 4:
+        return "var(--color-accent)"; // FWD - Pink
+      default:
+        return "#9ca3af";
     }
   };
 
@@ -47,7 +40,7 @@ export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({
           </div>
           <div className="tooltip-stat-row">
             <span>Points Per Game:</span>
-            <span className="tooltip-stat-val">{player.pointsPerGame.toFixed(1)}</span>
+            <span className="tooltip-stat-val">{player.pointsPerMatch.toFixed(1)}</span>
           </div>
           <div className="tooltip-stat-row">
             <span>Cost:</span>
@@ -58,8 +51,8 @@ export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({
             <span>{player.totalPoints} pts</span>
           </div>
           <div className="tooltip-stat-row">
-            <span>Value (Pts/£m):</span>
-            <span style={{ color: 'var(--color-accent)' }}>{player.value.toFixed(1)}</span>
+            <span>Pts/£m:</span>
+            <span style={{ color: "var(--color-accent)" }}>{player.pointsPerMillion.toFixed(1)}</span>
           </div>
         </div>
       );
@@ -84,13 +77,11 @@ export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({
         cy={cy}
         r={isSelected ? 4 : 3}
         fill={getPositionColor(payload.positionId)}
-        stroke={isSelected ? '#fff' : 'rgba(0,0,0,0.3)'}
+        stroke={isSelected ? "#fff" : "rgba(0,0,0,0.3)"}
         strokeWidth={isSelected ? 2 : 1}
         style={{
-          transition: 'all 0.2s ease',
-          filter: isSelected
-            ? 'drop-shadow(0px 0px 8px var(--color-accent))'
-            : 'none',
+          transition: "all 0.2s ease",
+          filter: isSelected ? "drop-shadow(0px 0px 8px var(--color-accent))" : "none",
         }}
       />
     );
@@ -100,19 +91,19 @@ export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({
     <div className="glass-card visualization-area">
       <div className="chart-header">
         <div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 style={{ fontSize: "1.25rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <Compass size={20} className="gradient-text-alt" />
             Value Finder (Cost vs. Points per Match)
           </h3>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+          <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
             Top-left players represent high-value targets (low cost, high points per match).
           </p>
         </div>
       </div>
 
-      <div className="chart-container" style={{ borderTop: '1px solid var(--border-light)', paddingTop: '1.5rem' }}>
+      <div className="chart-container" style={{ borderTop: "1px solid var(--border-light)", paddingTop: "1.5rem" }}>
         {players.length === 0 ? (
-          <div style={{ color: 'var(--text-muted)', textAlign: 'center' }}>
+          <div style={{ color: "var(--text-muted)", textAlign: "center" }}>
             No player data fits the current filters. Please broaden your filters.
           </div>
         ) : (
@@ -124,21 +115,39 @@ export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({
                 dataKey="cost"
                 name="Cost"
                 unit="m"
-                domain={['dataMin - 0.5', 'dataMax + 0.5']}
+                domain={["dataMin - 0.5", "dataMax + 0.5"]}
                 stroke="var(--text-muted)"
-                tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
-                label={{ value: 'Player Price (£m)', position: 'bottom', offset: 0, fill: 'var(--text-muted)', fontSize: 13, fontWeight: 500 }}
+                tick={{ fill: "var(--text-muted)", fontSize: 12 }}
+                label={{
+                  value: "Player Price (£m)",
+                  position: "bottom",
+                  offset: 0,
+                  fill: "var(--text-muted)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                }}
               />
               <YAxis
                 type="number"
-                dataKey="pointsPerGame"
-                name="Points Per Game"
-                domain={[0, 'dataMax + 0.5']}
+                dataKey="pointsPerMatch"
+                name="Points Per Match"
+                domain={[0, "dataMax + 0.5"]}
                 stroke="var(--text-muted)"
-                tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
-                label={{ value: 'Points Per Game (PPG)', angle: -90, position: 'insideLeft', offset: 10, fill: 'var(--text-muted)', fontSize: 13, fontWeight: 500 }}
+                tick={{ fill: "var(--text-muted)", fontSize: 12 }}
+                label={{
+                  value: "Points Per Game (PPG)",
+                  angle: -90,
+                  position: "insideLeft",
+                  offset: 10,
+                  fill: "var(--text-muted)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                }}
               />
-              <Tooltip content={<CustomScatterTooltip />} cursor={{ strokeDasharray: '3 3', stroke: 'rgba(255,255,255,0.2)' }} />
+              <Tooltip
+                content={<CustomScatterTooltip />}
+                cursor={{ strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.2)" }}
+              />
               <Scatter
                 name="Players"
                 data={players}
@@ -150,21 +159,62 @@ export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({
                 verticalAlign="top"
                 height={36}
                 content={() => (
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: '1.25rem', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--color-secondary)', display: 'inline-block' }}></span>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      gap: "1.25rem",
+                      fontSize: "0.8rem",
+                      color: "var(--text-muted)",
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <span
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: "50%",
+                          background: "var(--color-secondary)",
+                          display: "inline-block",
+                        }}
+                      ></span>
                       Goalkeeper
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--color-success)', display: 'inline-block' }}></span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <span
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: "50%",
+                          background: "var(--color-success)",
+                          display: "inline-block",
+                        }}
+                      ></span>
                       Defender
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--color-primary)', display: 'inline-block' }}></span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <span
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: "50%",
+                          background: "var(--color-primary)",
+                          display: "inline-block",
+                        }}
+                      ></span>
                       Midfielder
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--color-accent)', display: 'inline-block' }}></span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <span
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: "50%",
+                          background: "var(--color-accent)",
+                          display: "inline-block",
+                        }}
+                      ></span>
                       Forward
                     </div>
                   </div>
