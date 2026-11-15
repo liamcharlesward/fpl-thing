@@ -9,212 +9,173 @@ interface VisualizerGraphProps {
   onSelectPlayer: (player: ProcessedPlayer) => void;
 }
 
-// TODO: Fix explicit anys!
+interface ScatterTooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: ProcessedPlayer }>;
+}
+
+interface ScatterPointProps {
+  cx?: number;
+  cy?: number;
+  payload?: ProcessedPlayer;
+}
+
+const getPositionColor = (positionId: number) => {
+  switch (positionId) {
+    case 1:
+      return "#67e8f9";
+    case 2:
+      return "#4ade80";
+    case 3:
+      return "#a78bfa";
+    case 4:
+      return "#f472b6";
+    default:
+      return "#94a3b8";
+  }
+};
+
+const CustomScatterTooltip = ({ active, payload }: ScatterTooltipProps) => {
+  const player = payload?.[0]?.payload;
+
+  if (!active || !player) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-700 bg-slate-900/95 p-3 shadow-2xl">
+      <div className="text-sm font-bold text-slate-50">{player.webName}</div>
+      <div className="mb-2 text-[11px] text-slate-400">
+        {player.teamShort} • {player.positionShort}
+      </div>
+      <div className="space-y-1 text-xs text-slate-300">
+        <div className="flex items-center justify-between gap-4">
+          <span>Points / match</span>
+          <span className="font-semibold text-cyan-300">{player.pointsPerMatch.toFixed(1)}</span>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <span>Cost</span>
+          <span className="font-semibold text-slate-50">£{player.cost.toFixed(1)}m</span>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <span>Total</span>
+          <span>{player.totalPoints} pts</span>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <span>Pts / £m</span>
+          <span className="font-semibold text-fuchsia-300">{player.pointsPerMillion.toFixed(1)}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({ players, selectedPlayer, onSelectPlayer }) => {
-  // Position color mapping
-  const getPositionColor = (positionId: number) => {
-    switch (positionId) {
-      case 1:
-        return "var(--color-secondary)"; // GK - Cyan
-      case 2:
-        return "var(--color-success)"; // DEF - Emerald
-      case 3:
-        return "var(--color-primary)"; // MID - Purple
-      case 4:
-        return "var(--color-accent)"; // FWD - Pink
-      default:
-        return "#9ca3af";
-    }
-  };
-
-  // Custom Scatter Tooltip
-  const CustomScatterTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const player: ProcessedPlayer = payload[0].payload;
-      return (
-        <div className="custom-chart-tooltip">
-          <div className="tooltip-player-name">{player.webName}</div>
-          <div className="tooltip-player-meta">
-            {player.teamShort} • {player.positionShort}
-          </div>
-          <div className="tooltip-stat-row">
-            <span>Points Per Game:</span>
-            <span className="tooltip-stat-val">{player.pointsPerMatch.toFixed(1)}</span>
-          </div>
-          <div className="tooltip-stat-row">
-            <span>Cost:</span>
-            <span style={{ fontWeight: 600 }}>£{player.cost.toFixed(1)}m</span>
-          </div>
-          <div className="tooltip-stat-row">
-            <span>Total Points:</span>
-            <span>{player.totalPoints} pts</span>
-          </div>
-          <div className="tooltip-stat-row">
-            <span>Pts/£m:</span>
-            <span style={{ color: "var(--color-accent)" }}>{player.pointsPerMillion.toFixed(1)}</span>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const handleScatterClick = (node: any) => {
+  const handleScatterClick = (node: { payload?: ProcessedPlayer } | undefined) => {
     if (node && node.payload) {
       onSelectPlayer(node.payload);
     }
   };
 
-  const CustomPoint = (props: any) => {
-    const { cx, cy, payload } = props;
+  const CustomPoint = (props: ScatterPointProps) => {
+    const payload = props.payload;
+    if (!payload || typeof props.cx !== "number" || typeof props.cy !== "number") return null;
 
     const isSelected = selectedPlayer?.id === payload.id;
 
     return (
       <circle
-        cx={cx}
-        cy={cy}
-        r={isSelected ? 4 : 3}
+        cx={props.cx}
+        cy={props.cy}
+        r={isSelected ? 5 : 3.5}
         fill={getPositionColor(payload.positionId)}
-        stroke={isSelected ? "#fff" : "rgba(0,0,0,0.3)"}
+        stroke={isSelected ? "#f8fafc" : "rgba(15,23,42,0.8)"}
         strokeWidth={isSelected ? 2 : 1}
         style={{
           transition: "all 0.2s ease",
-          filter: isSelected ? "drop-shadow(0px 0px 8px var(--color-accent))" : "none",
+          filter: isSelected ? "drop-shadow(0 0 10px rgba(168, 184, 255, 0.7))" : "none",
         }}
       />
     );
   };
 
   return (
-    <div className="glass-card visualization-area">
-      <div className="chart-header">
+    <div className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.35)] backdrop-blur-sm">
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-300">
+          <Compass size={18} />
+        </div>
         <div>
-          <h3 style={{ fontSize: "1.25rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <Compass size={20} className="gradient-text-alt" />
-            Value Finder (Cost vs. Points per Match)
-          </h3>
-          <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
-            Top-left players represent high-value targets (low cost, high points per match).
-          </p>
+          <h3 className="text-lg font-semibold text-slate-50">Value Finder</h3>
+          <p className="text-xs text-slate-400">Cost vs. points per match</p>
         </div>
       </div>
 
-      <div className="chart-container" style={{ borderTop: "1px solid var(--border-light)", paddingTop: "1.5rem" }}>
+      <div className="h-105 w-full rounded-xl border border-slate-800 bg-slate-950/40 p-2">
         {players.length === 0 ? (
-          <div style={{ color: "var(--text-muted)", textAlign: "center" }}>
-            No player data fits the current filters. Please broaden your filters.
+          <div className="flex h-full items-center justify-center text-sm text-slate-400">
+            No player data fits the current filters.
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: -10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(168, 85, 247, 0.08)" />
+            <ScatterChart margin={{ top: 12, right: 16, bottom: 24, left: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.18)" />
               <XAxis
                 type="number"
                 dataKey="cost"
                 name="Cost"
                 unit="m"
                 domain={["dataMin - 0.5", "dataMax + 0.5"]}
-                stroke="var(--text-muted)"
-                tick={{ fill: "var(--text-muted)", fontSize: 12 }}
-                label={{
-                  value: "Player Price (£m)",
-                  position: "bottom",
-                  offset: 0,
-                  fill: "var(--text-muted)",
-                  fontSize: 13,
-                  fontWeight: 500,
-                }}
+                stroke="#94a3b8"
+                tick={{ fill: "#94a3b8", fontSize: 12 }}
+                label={{ value: "Player Price (£m)", position: "bottom", offset: 0, fill: "#94a3b8", fontSize: 12 }}
               />
               <YAxis
                 type="number"
                 dataKey="pointsPerMatch"
                 name="Points Per Match"
                 domain={[0, "dataMax + 0.5"]}
-                stroke="var(--text-muted)"
-                tick={{ fill: "var(--text-muted)", fontSize: 12 }}
+                stroke="#94a3b8"
+                tick={{ fill: "#94a3b8", fontSize: 12 }}
                 label={{
                   value: "Points Per Game (PPG)",
                   angle: -90,
                   position: "insideLeft",
                   offset: 10,
-                  fill: "var(--text-muted)",
-                  fontSize: 13,
-                  fontWeight: 500,
+                  fill: "#94a3b8",
+                  fontSize: 12,
                 }}
               />
               <Tooltip
                 content={<CustomScatterTooltip />}
-                cursor={{ strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.2)" }}
+                cursor={{ strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.18)" }}
               />
               <Scatter
                 name="Players"
                 data={players}
                 onClick={handleScatterClick}
                 cursor="pointer"
-                shape={<CustomPoint />}
+                shape={CustomPoint}
               />
               <Legend
                 verticalAlign="top"
                 height={36}
                 content={() => (
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      gap: "1.25rem",
-                      fontSize: "0.8rem",
-                      color: "var(--text-muted)",
-                      marginBottom: "1rem",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                      <span
-                        style={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: "50%",
-                          background: "var(--color-secondary)",
-                          display: "inline-block",
-                        }}
-                      ></span>
+                  <div className="mb-3 flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-400">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded-full bg-cyan-300" />
                       Goalkeeper
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                      <span
-                        style={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: "50%",
-                          background: "var(--color-success)",
-                          display: "inline-block",
-                        }}
-                      ></span>
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded-full bg-green-400" />
                       Defender
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                      <span
-                        style={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: "50%",
-                          background: "var(--color-primary)",
-                          display: "inline-block",
-                        }}
-                      ></span>
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded-full bg-violet-400" />
                       Midfielder
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                      <span
-                        style={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: "50%",
-                          background: "var(--color-accent)",
-                          display: "inline-block",
-                        }}
-                      ></span>
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded-full bg-pink-400" />
                       Forward
                     </div>
                   </div>

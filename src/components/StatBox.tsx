@@ -8,40 +8,20 @@ export interface StatBoxProps {
 }
 
 const defaultValueStyling = {
-  fontSize: "1.25rem",
-  fontWeight: "700",
+  fontSize: "1.05rem",
+  fontWeight: 700,
 };
 
 export const StatBox = (props: StatBoxProps) => {
   return (
-    <div
-      style={{
-        background: "rgba(255, 255, 255, 0.03)",
-        border: "1px solid rgba(255, 255, 255, 0.05)",
-        padding: "0.75rem",
-        borderRadius: "var(--radius-sm)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.25rem",
-      }}
-    >
-      <span
-        style={{
-          fontSize: "0.75rem",
-          color: "var(--text-muted)",
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
-        {props.icon && (
-          <props.icon size={12} style={{ display: "inline", marginRight: 4, verticalAlign: "text-bottom" }} />
-        )}
-        {props.label}
-      </span>
-      <span style={props.valueStyling ? { ...defaultValueStyling, ...props.valueStyling } : defaultValueStyling}>
+    <div className="rounded-xl border border-slate-700 bg-slate-800/80 p-2.5 shadow-sm shadow-slate-950/40">
+      <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">
+        {props.icon && <props.icon size={12} className="text-slate-300" />}
+        <span>{props.label}</span>
+      </div>
+      <div className="mt-2 text-base font-semibold text-slate-50" style={props.valueStyling ?? defaultValueStyling}>
         {props.value}
-      </span>
+      </div>
     </div>
   );
 };

@@ -1,79 +1,69 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 @import url("teamColours.css");
 @import "tailwindcss";
 
 :root {
-  --font-sans: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  color-scheme: dark;
+  background-color: #020817;
+  --app-bg: #020817;
+  --app-panel: rgba(15, 23, 42, 0.96);
+  --app-panel-strong: rgba(15, 23, 42, 0.98);
+  --app-border: rgba(148, 163, 184, 0.22);
+  --app-muted: #94a3b8;
+  --app-text: #e2e8f0;
+  --app-soft: #cbd5e1;
+}
 
-  /* Color Palette */
-  --bg-deep: #0b0612;
-  --bg-card: rgba(22, 13, 37, 0.65);
-  --bg-card-hover: rgba(30, 19, 50, 0.85);
-  --bg-input: rgba(13, 7, 22, 0.8);
-
-  --border-light: rgba(168, 85, 247, 0.15);
-  --border-medium: rgba(168, 85, 247, 0.3);
-  --border-glow: rgba(236, 72, 153, 0.4);
-
-  --color-primary: #a855f7;
-  --color-primary-bg: rgba(168, 85, 247, 0.1);
-  /* Purple */
-  --color-secondary: #06b6d4;
-  --color-secondary-bg: rgba(6, 182, 212, 0.1);
-  /* Cyan */
-  --color-accent: #ec4899;
-  --color-accent-bg: rgba(236, 72, 153, 0.1);
-  /* Pink */
-  --color-success: #10b981;
-  --color-success-bg: rgba(16, 185, 129, 0.1);
-  /* Emerald */
-  --color-warning: #f59e0b;
-  /* Amber */
-  --color-danger: #ef4444;
-  /* Red */
-
-  --text-primary: #f3f4f6;
-  --text-muted: #9ca3af;
-  --text-dark: #1f2937;
-
-  --shadow-glow: 0 0 20px rgba(168, 85, 247, 0.15);
-  --shadow-glow-strong: 0 0 30px rgba(236, 72, 153, 0.3);
-
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
+html {
+  background: var(--app-bg);
 }
 
 body {
-  background-color: var(--bg-deep);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
+  margin: 0;
   min-height: 100vh;
-  overflow-x: hidden;
-  background-image:
-    radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
-  background-attachment: fixed;
+  background:
+    radial-gradient(circle at top, rgba(15, 118, 110, 0.08), transparent 28%),
+    linear-gradient(180deg, #020817 0%, #0f172a 100%);
+  color: var(--app-text);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select {
+  font: inherit;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(13, 7, 22, 0.5);
+  background: rgba(15, 23, 42, 0.9);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-medium);
-  border-radius: 4px;
+  background: rgba(100, 116, 139, 0.75);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary);
+  background: rgba(148, 163, 184, 0.8);
+}
+
+input[type="range"] {
+  accent-color: #38bdf8;
 }
 
 /* Layout Utilities */
@@ -87,10 +77,10 @@ body {
 
 /* Glassmorphism Card */
 .glass-card {
-  background: var(--bg-card);
+  background: var(--app-panel);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--app-border);
   border-radius: var(--radius-md);
   padding: 1.5rem;
   box-shadow: var(--shadow-glow);
@@ -98,11 +88,11 @@ body {
 }
 
 .glass-card:hover {
-  border-color: var(--border-medium);
+  border-color: var(--app-muted);
 }
 
 .glass-card.interactive:hover {
-  background: var(--bg-card-hover);
+  background: var(--app-panel-strong);
   transform: translateY(-2px);
   box-shadow: 0 10px 30px rgba(168, 85, 247, 0.1);
 }
@@ -189,7 +179,7 @@ h6 {
   height: 48px;
   border-radius: 12px;
   background: rgba(168, 85, 247, 0.15);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--app-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -203,7 +193,7 @@ h6 {
 
 .stat-label {
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: var(--app-muted);
 }
 
 .stat-value {
@@ -231,13 +221,13 @@ h6 {
   align-items: center;
   gap: 1rem;
   padding: 0 1rem;
-  background: var(--bg-input);
-  border: 1px solid var(--border-light);
+  background: var(--app-panel);
+  border: 1px solid var(--app-border);
   border-radius: var(--radius-sm);
 }
 
 .search-icon {
-  color: var(--text-muted);
+  color: var(--app-muted);
   flex-shrink: 0;
 }
 
@@ -250,7 +240,7 @@ h6 {
   border: 0;
   background: transparent;
   padding: 0.875rem 0;
-  color: var(--text-primary);
+  color: var(--app-text);
   font: inherit;
   outline: none;
 }
@@ -271,7 +261,7 @@ h6 {
 .custom-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--app-muted);
   display: flex;
   justify-content: space-between;
 }
@@ -279,10 +269,10 @@ h6 {
 .custom-select {
   width: 100%;
   padding: 0.875rem 1rem;
-  background: var(--bg-input);
-  border: 1px solid var(--border-light);
+  background: var(--app-panel);
+  border: 1px solid var(--app-border);
   border-radius: var(--radius-sm);
-  color: var(--text-primary);
+  color: var(--app-text);
   font-family: var(--font-sans);
   font-size: 0.95rem;
   appearance: none;
@@ -308,9 +298,9 @@ h6 {
 .pill-button {
   padding: 0.5rem 1rem;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--app-border);
   border-radius: 9999px;
-  color: var(--text-muted);
+  color: var(--app-muted);
   cursor: pointer;
   font-family: var(--font-sans);
   font-weight: 500;
@@ -396,7 +386,7 @@ h6 {
 .chart-tabs {
   display: flex;
   background: rgba(13, 7, 22, 0.5);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--app-border);
   border-radius: 8px;
   padding: 0.25rem;
 }
@@ -405,7 +395,7 @@ h6 {
   padding: 0.5rem 1rem;
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: var(--app-muted);
   cursor: pointer;
   font-family: var(--font-sans);
   font-weight: 600;
@@ -415,9 +405,9 @@ h6 {
 }
 
 .chart-tab.active {
-  background: var(--bg-card);
+  background: var(--app-panel);
   color: #fff;
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--app-border);
 }
 
 .chart-container {
@@ -432,7 +422,7 @@ h6 {
 /* Custom Recharts Tooltip */
 .custom-chart-tooltip {
   background: rgba(15, 9, 26, 0.95);
-  border: 1px solid var(--border-medium);
+  border: 1px solid var(--app-border);
   border-radius: var(--radius-sm);
   padding: 1rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
@@ -449,7 +439,7 @@ h6 {
 
 .tooltip-player-meta {
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: var(--app-muted);
   margin-bottom: 0.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 0.5rem;
@@ -472,7 +462,7 @@ h6 {
 .table-area {
   overflow-x: auto;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--app-border);
   background: rgba(10, 5, 18, 0.4);
 }
 
@@ -487,8 +477,8 @@ h6 {
   background: rgba(19, 10, 32, 0.9);
   padding: 1rem;
   font-weight: 600;
-  color: var(--text-muted);
-  border-bottom: 1px solid var(--border-light);
+  color: var(--app-muted);
+  border-bottom: 1px solid var(--app-border);
   cursor: pointer;
   user-select: none;
   transition: var(--transition-smooth);
@@ -502,7 +492,7 @@ h6 {
 .players-table td {
   padding: 0.875rem 1rem;
   border-bottom: 1px solid rgba(168, 85, 247, 0.08);
-  color: var(--text-primary);
+  color: var(--app-text);
 }
 
 .players-table tr {
@@ -533,15 +523,15 @@ h6 {
   justify-content: center;
   text-align: center;
   padding: 3rem 1.5rem;
-  color: var(--text-muted);
-  border: 2px dashed var(--border-light);
+  color: var(--app-muted);
+  border: 2px dashed var(--app-border);
   border-radius: var(--radius-md);
   height: 100%;
   gap: 1rem;
 }
 
 .detail-header {
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--app-border);
   padding-bottom: 1rem;
   margin-bottom: 1rem;
 }
@@ -638,9 +628,9 @@ h6 {
 .reset-button {
   padding: 0.5rem 1rem;
   background: transparent;
-  border: 1px solid var(--border-medium);
+  border: 1px solid var(--app-muted);
   border-radius: 6px;
-  color: var(--text-primary);
+  color: var(--app-text);
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: 0.85rem;
@@ -663,13 +653,13 @@ h6 {
   justify-content: space-between;
   gap: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--border-light);
+  border-top: 1px solid var(--app-border);
   flex-wrap: wrap;
 }
 
 .pagination-info {
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: var(--app-muted);
   white-space: nowrap;
 }
 
@@ -684,9 +674,9 @@ h6 {
   height: 34px;
   padding: 0 0.5rem;
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--app-border);
   border-radius: 6px;
-  color: var(--text-muted);
+  color: var(--app-muted);
   font-family: var(--font-sans);
   font-size: 0.85rem;
   font-weight: 600;
@@ -700,7 +690,7 @@ h6 {
 
 .page-btn:hover:not(:disabled) {
   background: rgba(168, 85, 247, 0.12);
-  border-color: var(--border-medium);
+  border-color: var(--app-muted);
   color: #fff;
 }
 
@@ -720,5 +710,5 @@ h6 {
   border: none;
   background: transparent;
   cursor: default;
-  color: var(--text-muted);
+  color: var(--app-muted);
 }

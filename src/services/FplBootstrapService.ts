@@ -81,34 +81,31 @@ export interface FplDataResult {
 }
 
 export async function fetchBootstrapData(): Promise<FplDataResult> {
-  let data: FplBootstrapData;
+  let data: FplBootstrapData | undefined;
   let isMock = false;
   let errorMsg: string | undefined;
 
   try {
-    // Request goes to Vite's dev proxy → fantasy.premierleague.com, avoiding CORS.
     const response = await fetch('/api/bootstrap-static/');
     if (!response.ok) {
       throw new Error(`FPL API responded with status ${response.status}`);
     }
-    data = await response.json() as FplBootstrapData;
+    data = (await response.json()) as FplBootstrapData;
     console.log('Successfully fetched live FPL data!');
   } catch (err) {
     console.warn('FPL API fetch failed, falling back to mock data:', err);
     isMock = true;
     errorMsg = err instanceof Error ? err.message : String(err);
+    data = { teams: [], element_types: [], elements: [] };
   }
 
-  // Create lookups
   const teamMap = new Map<number, FplTeam>();
   data.teams.forEach(t => teamMap.set(t.id, t));
 
   const positionMap = new Map<number, FplElementType>();
   data.element_types.forEach(et => positionMap.set(et.id, et));
 
-  // Process players
   const players: ProcessedPlayer[] = data.elements.map(el => {
-
     const team = teamMap.get(el.team);
     const position = positionMap.get(el.element_type);
     const cost = el.now_cost / 10;
@@ -151,6 +148,6 @@ export async function fetchBootstrapData(): Promise<FplDataResult> {
     teams: data.teams,
     positions: data.element_types,
     isMock,
-    error: errorMsg
+    error: errorMsg,
   };
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import type { ProcessedPlayer } from "../services/FplBootstrapService";
 import { motion, AnimatePresence } from "motion/react";
-import { FaX } from "react-icons/fa6";
+import { X } from "lucide-react";
 import { PlayerDetailLayout } from "./PlayerDetailLayout";
 import type { FplHistory } from "../services/FplHistoryService";
 
@@ -19,19 +19,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedPlayer, playerHistory,
       {selectedPlayer && (
         <motion.aside
           key={selectedPlayer.id}
-          className="fixed top-0 right-0 h-full min-w-1/3 max-w-1/2 bg-gray-800 z-50 overflow-y-auto flex-8 shadow-3xl"
+          className="fixed inset-y-0 right-0 z-50 w-full max-w-xl border-l border-slate-700/80 bg-slate-950/95 shadow-[-18px_0_50px_rgba(2,6,23,0.6)] backdrop-blur-xl"
           initial={{ x: "100%" }}
           animate={{ x: 0 }}
           exit={{ x: "100%" }}
-          transition={{ type: "tween", duration: 0.3, ease: "easeInOut" }}
+          transition={{ type: "tween", duration: 0.25, ease: "easeInOut" }}
         >
-          <div className="flex w-full justify-end bg-gray-900 p-2">
-            <button type="button" onClick={onClose} aria-label="Close sidebar">
-              <FaX className="text-xl text-white cursor-pointer" />
+          <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/70 px-4 py-3">
+            <div className="text-sm font-medium uppercase tracking-[0.18em] text-slate-400">Player Details</div>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close sidebar"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-300 transition hover:border-slate-500 hover:bg-slate-800/90"
+            >
+              <X size={18} />
             </button>
           </div>
 
-          <div className="p-2">
+          <div className="h-[calc(100vh-57px)] overflow-y-auto px-4 py-4">
             <PlayerDetailLayout player={selectedPlayer} playerHistory={history} />
           </div>
         </motion.aside>

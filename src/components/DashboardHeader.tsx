@@ -16,58 +16,52 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   avgPpg,
 }) => {
   return (
-    <div className="glass-card flex flex-col gap-6">
-      <div className="header-wrapper">
-        <div className="brand-section">
-          <div className="brand-logo">
-            <LuActivity size={24} color="#fff" />
+    <header className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-5 shadow-[0_12px_34px_rgba(15,23,42,0.45)] backdrop-blur-sm">
+      <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 via-sky-500 to-indigo-500 shadow-lg shadow-cyan-500/20">
+            <LuActivity size={22} className="text-white" />
           </div>
           <div>
-            <h1 className="gradient-text" style={{ fontSize: "1.75rem", fontWeight: 800 }}>
-              FPL StatViewer
-            </h1>
-            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Points Per Match & Value Tracker</p>
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-50 sm:text-[2rem]">FPL StatViewer</h1>
+            <p className="text-sm text-slate-400">Points Per Match & Value Tracker</p>
           </div>
         </div>
 
-        <div className="stats-grid" style={{ borderTop: "1px solid var(--border-light)", paddingTop: "1.25rem" }}>
-          <div className="stat-item">
-            <div className="stat-icon">
-              <LuUsers size={20} />
+        <div className="grid w-full gap-3 sm:grid-cols-3 xl:max-w-[760px]">
+          <div className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/80 p-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-700 text-cyan-300">
+              <LuUsers size={18} />
             </div>
-            <div className="stat-info">
-              <span className="stat-label">Players Displayed</span>
-              <span className="stat-value">{totalCount}</span>
-            </div>
-          </div>
-
-          <div className="stat-item">
-            <div className="stat-icon" style={{ color: "var(--color-accent)", background: "rgba(236, 72, 153, 0.15)" }}>
-              <LuTrendingUp size={20} />
-            </div>
-            <div className="stat-info">
-              <span className="stat-label">Highest Points/Match</span>
-              <span className="stat-value" style={{ fontSize: "1.15rem", fontWeight: 700 }}>
-                {highestPpgName}{" "}
-                <span style={{ color: "var(--color-accent)", fontWeight: 800 }}>({highestPpgValue.toFixed(1)})</span>
-              </span>
+            <div className="min-w-0">
+              <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">Players</div>
+              <div className="text-xl font-bold text-slate-50">{totalCount}</div>
             </div>
           </div>
 
-          <div className="stat-item">
-            <div
-              className="stat-icon"
-              style={{ color: "var(--color-secondary)", background: "rgba(6, 182, 212, 0.15)" }}
-            >
-              <LuActivity size={20} />
+          <div className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/80 p-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-fuchsia-500/10 text-fuchsia-300">
+              <LuTrendingUp size={18} />
             </div>
-            <div className="stat-info">
-              <span className="stat-label">Average Points/Match</span>
-              <span className="stat-value">{avgPpg.toFixed(2)}</span>
+            <div className="min-w-0">
+              <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">High PPM</div>
+              <div className="truncate text-base font-bold text-slate-50">
+                {highestPpgName} <span className="text-fuchsia-300">({highestPpgValue.toFixed(1)})</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/80 p-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-300">
+              <LuActivity size={18} />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-slate-400">Avg PPM</div>
+              <div className="text-xl font-bold text-slate-50">{avgPpg.toFixed(2)}</div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 };

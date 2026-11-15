@@ -21,7 +21,7 @@ function App() {
   const [players, setPlayers] = useState<ProcessedPlayer[]>([]);
   const [teams, setTeams] = useState<FplTeam[]>([]);
   const [positions, setPositions] = useState<FplElementType[]>([]);
-  const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
+  const [filtersVisible, setFiltersVisible] = useState<boolean>(true);
 
   // Filter States
   const [search, setSearch] = useState("");
@@ -197,94 +197,92 @@ function App() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          height: "100vh",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "1rem",
-        }}
-      >
-        <Activity size={48} className="gradient-text-alt" style={{ animation: "spin 2s linear infinite" }} />
-        <h3 style={{ fontWeight: 600 }}>Loading FPL Player Data...</h3>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>Fetching stats and rendering visualizations</p>
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-200">
+        <div className="flex flex-col items-center gap-4">
+          <Activity size={42} className="animate-spin text-cyan-400" />
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-slate-50">Loading FPL Player Data...</h3>
+            <p className="text-sm text-slate-400">Fetching stats and rendering visualizations</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <motion.div className="app-container" layout>
-        {/* Header */}
-        <DashboardHeader
-          isMock={isMock}
-          totalCount={filteredPlayers.length}
-          highestPpgName={stats.highestPpgName}
-          highestPpgValue={stats.highestPpgValue}
-          avgPpg={stats.avgPpg}
-        />
+      <motion.div className="min-h-screen bg-slate-950 px-4 py-5 text-slate-100 sm:px-6 lg:px-8" layout>
+        <div className="mx-auto flex max-w-[1600px] flex-col gap-5">
+          {/* Header */}
+          <DashboardHeader
+            isMock={isMock}
+            totalCount={filteredPlayers.length}
+            highestPpgName={stats.highestPpgName}
+            highestPpgValue={stats.highestPpgValue}
+            avgPpg={stats.avgPpg}
+          />
 
-        {/* Warning banner for CORS fallback */}
-        {isMock && (
-          <div className="notification-bar">
-            <AlertTriangle size={18} style={{ flexShrink: 0 }} />
-            <div>
-              <strong>Demo Mode Enabled:</strong> The official FPL API lacks cross-origin (CORS) headers and was
-              unreachable from the browser. The app loaded a high-fidelity snapshot of Premier League players.
-              {errorMsg && <span style={{ opacity: 0.8, fontSize: "0.8rem", marginLeft: "0.5rem" }}>({errorMsg})</span>}
+          {/* Warning banner for CORS fallback */}
+          {isMock && (
+            <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+              <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-300" />
+              <div>
+                <strong>Demo Mode Enabled:</strong> The official FPL API lacks cross-origin (CORS) headers and was
+                unreachable from the browser.
+                {errorMsg && <span className="ml-2 text-amber-100/80">({errorMsg})</span>}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Filter Options*/}
-        {/* TODO: RE-work filter UI */}
-        <Filters
-          search={search}
-          setSearch={setSearch}
-          selectedTeam={selectedTeam}
-          setSelectedTeam={setSelectedTeam}
-          selectedPosition={selectedPosition}
-          setSelectedPosition={setSelectedPosition}
-          minMinutes={minMinutes}
-          setMinMinutes={setMinMinutes}
-          maxPrice={maxPrice}
-          setMaxPrice={setMaxPrice}
-          teams={teams}
-          positions={positions}
-          onReset={handleResetFilters}
-          maxMinutesAvailable={maxMinutesInDataset}
-          highestPriceAvailable={maxPriceInDataset}
-          visible={filtersVisible}
-          visibilityToggle={toggleFilters}
-        />
+          {/* Filter Options*/}
+          {/* TODO: RE-work filter UI */}
+          <Filters
+            search={search}
+            setSearch={setSearch}
+            selectedTeam={selectedTeam}
+            setSelectedTeam={setSelectedTeam}
+            selectedPosition={selectedPosition}
+            setSelectedPosition={setSelectedPosition}
+            minMinutes={minMinutes}
+            setMinMinutes={setMinMinutes}
+            maxPrice={maxPrice}
+            setMaxPrice={setMaxPrice}
+            teams={teams}
+            positions={positions}
+            onReset={handleResetFilters}
+            maxMinutesAvailable={maxMinutesInDataset}
+            highestPriceAvailable={maxPriceInDataset}
+            visible={filtersVisible}
+            visibilityToggle={toggleFilters}
+          />
 
-        {/* Main Grid: Visuals and Detail */}
-        <div className="dashboard-grid">
-          {/* Left Column: Visual Graph */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            <ValueFinderGraph
-              players={filteredPlayers}
-              selectedPlayer={selectedPlayer}
-              onSelectPlayer={handlePlayerHistory}
-            />
-          </div>
+          {/* Main Grid: Visuals and Detail */}
+          <div className="grid gap-5 xl:grid-cols-[1.2fr_1fr]">
+            {/* Left Column: Visual Graph */}
+            <div className="min-w-0">
+              <ValueFinderGraph
+                players={filteredPlayers}
+                selectedPlayer={selectedPlayer}
+                onSelectPlayer={handlePlayerHistory}
+              />
+            </div>
 
-          {/* Right Column: Sidebar Stats card */}
-          <div>
-            {/* Player Leaderboard Table */}
-            <PlayerTable
-              players={sortedPlayers}
-              selectedPlayer={selectedPlayer}
-              onSelectPlayer={handlePlayerHistory}
-              sortField={sortField}
-              sortDirection={sortDirection}
-              onSort={handleSort}
-            />
+            {/* Right Column: Sidebar Stats card */}
+            <div className="min-w-0">
+              {/* Player Leaderboard Table */}
+              <PlayerTable
+                players={sortedPlayers}
+                selectedPlayer={selectedPlayer}
+                onSelectPlayer={handlePlayerHistory}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+            </div>
           </div>
         </div>
       </motion.div>
+
       <Sidebar selectedPlayer={selectedPlayer} playerHistory={playerHistoryData} onClose={clearPlayerAndHistory} />
     </>
   );
