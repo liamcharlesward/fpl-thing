@@ -19,7 +19,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     <header className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-5 shadow-[0_12px_34px_rgba(15,23,42,0.45)] backdrop-blur-sm">
       <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 via-sky-500 to-indigo-500 shadow-lg shadow-cyan-500/20">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br from-cyan-400 via-sky-500 to-indigo-500 shadow-lg shadow-cyan-500/20">
             <LuActivity size={22} className="text-white" />
           </div>
           <div>
@@ -28,7 +28,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           </div>
         </div>
 
-        <div className="grid w-full gap-3 sm:grid-cols-3 xl:max-w-[760px]">
+        <div className="grid w-full gap-3 sm:grid-cols-3 xl:max-w-190">
           <div className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800/80 p-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-700 text-cyan-300">
               <LuUsers size={18} />

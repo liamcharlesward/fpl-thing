@@ -75,28 +75,6 @@ input[type="range"] {
   min-height: 100vh;
 }
 
-/* Glassmorphism Card */
-.glass-card {
-  background: var(--app-panel);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--app-border);
-  border-radius: var(--radius-md);
-  padding: 1.5rem;
-  box-shadow: var(--shadow-glow);
-  transition: var(--transition-smooth);
-}
-
-.glass-card:hover {
-  border-color: var(--app-muted);
-}
-
-.glass-card.interactive:hover {
-  background: var(--app-panel-strong);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(168, 85, 247, 0.1);
-}
-
 /* Typography */
 h1,
 h2,

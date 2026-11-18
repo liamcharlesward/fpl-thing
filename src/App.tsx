@@ -11,8 +11,12 @@ import type { ProcessedPlayer } from "./services/FplBootstrapService";
 import type { FplTeam, FplElementType } from "./services/FplBootstrapService";
 import { Activity, AlertTriangle } from "lucide-react";
 import { motion } from "motion/react";
-import { Sidebar } from "./components/Sidebar";
+import { Modal } from "./components/Modal";
 import type { FplHistory } from "./services/FplHistoryService";
+import { Card } from "./components/Card";
+import { LuCompass } from "react-icons/lu";
+import { GiSoccerBall } from "react-icons/gi";
+import { getAverageMetric, getHighestMetricPlayer } from "./services/PlayerAveragesAndRecords";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -100,6 +104,7 @@ function App() {
     }
   };
 
+  // TODO: Update to element summary; will require work in FplHistoryService
   const handlePlayerHistory = async (player: ProcessedPlayer) => {
     try {
       const { history } = await fetchHistoryData(player.id);
@@ -178,20 +183,12 @@ function App() {
       };
     }
 
-    let highest = filteredPlayers[0];
-    let totalPpg = 0;
-
-    filteredPlayers.forEach((p) => {
-      totalPpg += p.pointsPerMatch;
-      if (p.pointsPerMatch > highest.pointsPerMatch) {
-        highest = p;
-      }
-    });
+    const highest = getHighestMetricPlayer(filteredPlayers, "pointsPerMatch");
 
     return {
       highestPpgName: highest.webName,
       highestPpgValue: highest.pointsPerMatch,
-      avgPpg: totalPpg / filteredPlayers.length,
+      avgPpg: getAverageMetric(filteredPlayers, "pointsPerMatch"),
     };
   }, [filteredPlayers]);
 
@@ -223,6 +220,7 @@ function App() {
           />
 
           {/* Warning banner for CORS fallback */}
+          {/* FIXME: Mock FplData no longer exists. This fallback page should be a simple error page */}
           {isMock && (
             <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
               <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-300" />
@@ -259,17 +257,17 @@ function App() {
           {/* Main Grid: Visuals and Detail */}
           <div className="grid gap-5 xl:grid-cols-[1.2fr_1fr]">
             {/* Left Column: Visual Graph */}
-            <div className="min-w-0">
+            <Card headerIcon={LuCompass} title="Player Value Graph">
               <ValueFinderGraph
                 players={filteredPlayers}
                 selectedPlayer={selectedPlayer}
                 onSelectPlayer={handlePlayerHistory}
               />
-            </div>
+            </Card>
 
             {/* Right Column: Sidebar Stats card */}
-            <div className="min-w-0">
-              {/* Player Leaderboard Table */}
+            {/* Player Leaderboard Table */}
+            <Card headerIcon={GiSoccerBall} title="Player Leaderboard">
               <PlayerTable
                 players={sortedPlayers}
                 selectedPlayer={selectedPlayer}
@@ -278,12 +276,17 @@ function App() {
                 sortDirection={sortDirection}
                 onSort={handleSort}
               />
-            </div>
+            </Card>
           </div>
         </div>
       </motion.div>
 
-      <Sidebar selectedPlayer={selectedPlayer} playerHistory={playerHistoryData} onClose={clearPlayerAndHistory} />
+      <Modal
+        selectedPlayer={selectedPlayer}
+        playerHistory={playerHistoryData}
+        allPlayers={players}
+        onClose={clearPlayerAndHistory}
+      />
     </>
   );
 }

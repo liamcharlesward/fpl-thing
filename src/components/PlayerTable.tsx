@@ -55,6 +55,7 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
     );
   };
 
+  // TODO: Merge with function in PlayerDetailLayout and move into standalone service file
   const getPositionBadgeStyle = (posShort: string) => {
     switch (posShort) {
       case "GKP":
@@ -85,12 +86,7 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.35)] backdrop-blur-sm">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-lg font-semibold text-slate-50">Player Leaderboard</h3>
-        <span className="text-xs uppercase tracking-[0.12em] text-slate-400">{players.length} players</span>
-      </div>
-
+    <>
       <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/40">
         {players.length === 0 ? (
           <div className="p-8 text-center text-sm text-slate-400">No players match the criteria</div>
@@ -112,7 +108,7 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
                     className="cursor-pointer px-3 py-3 text-right font-medium"
                     onClick={() => onSort("pointsPerMatch")}
                   >
-                    PPG {renderSortIcon("pointsPerMatch")}
+                    PPM {renderSortIcon("pointsPerMatch")}
                   </th>
                   <th className="cursor-pointer px-3 py-3 text-right font-medium" onClick={() => onSort("cost")}>
                     Price {renderSortIcon("cost")}
@@ -153,7 +149,7 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
                         )}
                       </td>
                       <td className="border-t border-slate-800 px-3 py-2.5">
-                        <Badge text={p.teamShort} colour={p.teamShort.toLowerCase()} />
+                        <Badge text={p.teamShort} teamColour={p.teamShort.toLowerCase()} />
                       </td>
                       <td className="border-t border-slate-800 px-3 py-2.5">
                         <span
@@ -235,6 +231,6 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };

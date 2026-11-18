@@ -1,11 +1,9 @@
 import React from "react";
 import type { ProcessedPlayer } from "../services/FplBootstrapService";
 import {
-  LuShieldAlert,
   LuStar,
   LuActivity,
   LuPoundSterling,
-  LuShield,
   LuGem,
   LuGauge,
   LuTriangleAlert,
@@ -15,19 +13,33 @@ import {
   LuShirt,
   LuGoal,
   LuHandshake,
+  LuChartBarIncreasing,
+  LuCheck,
+  LuBriefcaseMedical,
+  LuGavel,
+  LuPlaneTakeoff,
+  LuSwords,
+  LuRotateCcw,
+  LuBan,
+  LuSparkle,
+  LuShieldX,
+  LuShieldEllipsis,
 } from "react-icons/lu";
 import { Badge } from "./Badge";
-import { GiGoalKeeper, GiSoccerField, GiSoccerKick } from "react-icons/gi";
+import { GiDefensiveWall, GiGoalKeeper, GiSoccerField, GiSoccerKick } from "react-icons/gi";
 import type { StatBoxProps } from "./StatBox";
 import { StatSection } from "./StatSection";
 import type { FplHistory } from "../services/FplHistoryService";
+import { getPlayerRemarks } from "../services/PlayerRemarkService";
+import { PlayerRemarkBanner } from "./PlayerRemarkBanner";
 
 interface PlayerDetailLayoutProps {
   player: ProcessedPlayer | null;
   playerHistory: FplHistory[];
+  allPlayers: ProcessedPlayer[];
 }
 
-export const PlayerDetailLayout: React.FC<PlayerDetailLayoutProps> = ({ player, playerHistory }) => {
+export const PlayerDetailLayout: React.FC<PlayerDetailLayoutProps> = ({ player, playerHistory, allPlayers }) => {
   if (!player) {
     return null;
   }
@@ -35,42 +47,103 @@ export const PlayerDetailLayout: React.FC<PlayerDetailLayoutProps> = ({ player, 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "a":
-        return (
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-300">● Available</span>
-        );
+        return <Badge icon={LuCheck} text="Available" className="text-emerald-600" border />;
       case "i":
-        return <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-300">● Injured</span>;
+        return <Badge icon={LuBriefcaseMedical} text="Injured" className="text-rose-600" border />;
       case "s":
-        return <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-300">● Suspended</span>;
+        return <Badge icon={LuGavel} text="Suspended" className="text-amber-600" border />;
       default:
-        return (
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-400">● Unavailable</span>
-        );
+        return <Badge icon={LuPlaneTakeoff} text="Unavailable" className="text-slate-600" border />;
     }
   };
 
   const getPositionBadge = (position: string) => {
     switch (position) {
       case "FWD":
-        return <Badge colour="accent" text="Forward" icon={GiSoccerKick} border />;
+        return (
+          <Badge
+            className="border-pink-400/30 bg-pink-500/10 text-pink-200"
+            text="Forward"
+            icon={GiSoccerKick}
+            border
+          />
+        );
       case "MID":
-        return <Badge colour="primary" text="Midfielder" icon={GiSoccerField} border />;
+        return (
+          <Badge
+            className="border-violet-400/30 bg-violet-500/10 text-violet-200"
+            text="Midfielder"
+            icon={GiSoccerField}
+            border
+          />
+        );
       case "DEF":
-        return <Badge colour="success" text="Defender" icon={LuShield} border />;
+        return (
+          <Badge
+            className="border-emerald-400/30 bg-emerald-500/10 text-emerald-200"
+            text="Defender"
+            icon={GiDefensiveWall}
+            border
+          />
+        );
       case "GKP":
-        return <Badge colour="secondary" text="Goalkeeper" icon={GiGoalKeeper} border />;
+        return (
+          <Badge
+            className="border-cyan-400/30 bg-cyan-500/10 text-cyan-200"
+            text="Goalkeeper"
+            icon={GiGoalKeeper}
+            border
+          />
+        );
     }
   };
 
+  // TODO: Merge with function in PlayerTable and move into standalone service file
   const getPositionSpecificStats = (position: string): StatBoxProps[] => {
     switch (position) {
       case "FWD":
       case "MID":
+        // Forwards & midfielders
         return [
           { icon: LuGoal, label: "Goals Scored", value: player.goals.toString() },
           { icon: LuHandshake, label: "Assists", value: player.assists.toString() },
         ];
+      case "DEF":
+        // Defenders
+        return [
+          {
+            icon: LuBan,
+            label: "CBI",
+            value: player.clearancesBlocksInterceptions.toString(),
+          },
+          {
+            icon: LuSwords,
+            label: "Tackles",
+            value: player.tackles.toString(),
+          },
+          {
+            icon: LuRotateCcw,
+            label: "Recoveries",
+            value: player.recoveries.toString(),
+          },
+          {
+            icon: LuSparkle,
+            label: "Clean Sheets",
+            value: player.cleanSheets.toString(),
+          },
+          {
+            icon: LuShieldX,
+            label: "Goals Conceded (GC)",
+            value: player.goalsConceded.toString(),
+          },
+          {
+            icon: LuShieldEllipsis,
+            label: "xGC",
+            value: player.expectedGoalsConceded.toString(),
+          },
+        ];
       default:
+        // Goalkeepers
         return [];
     }
   };
@@ -81,6 +154,7 @@ export const PlayerDetailLayout: React.FC<PlayerDetailLayoutProps> = ({ player, 
     { icon: LuActivity, label: "Points / Match (PPM)", value: player.pointsPerMatch.toFixed(1) },
     { icon: LuGem, label: "Points / £Million", value: player.pointsPerMillion.toFixed(1) },
     { icon: LuGauge, label: "PPM / £Million", value: player.pointsPerMatchPerMil.toString() },
+    { icon: LuChartBarIncreasing, label: "ICT Index", value: player.ictIndex.toString() },
   ];
 
   const disciplineAndAvailabilityStats: StatBoxProps[] = [
@@ -97,40 +171,31 @@ export const PlayerDetailLayout: React.FC<PlayerDetailLayoutProps> = ({ player, 
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 shadow-[0_12px_32px_rgba(15,23,42,0.35)]">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">{player.teamShort}</p>
-            <h3 className="mt-2 text-2xl font-bold text-slate-50">
-              <span className="font-medium text-slate-300">{player.firstName}</span> <span>{player.lastName}</span>
-            </h3>
-          </div>
-          <div className="rounded-full border border-slate-700 bg-slate-800 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
-            ID {player.id}
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <Badge colour={player.teamShort.toLowerCase()} text={player.teamName} border />
+    <div>
+      <div className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 gap-4 shadow-[0_12px_32px_rgba(15,23,42,0.35)] flex flex-col">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge teamColour={player.teamShort.toLowerCase()} text={player.teamName} border />
           {getPositionBadge(player.positionShort)}
           {getStatusBadge(player.status)}
         </div>
 
-        {player.news && (
-          <div className="mt-4 flex items-start gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
-            <LuShieldAlert size={14} className="mt-0.5 shrink-0 text-rose-300" />
-            <span>{player.news}</span>
+        {getPlayerRemarks(player, allPlayers).length != 0 && (
+          <div className="grid grid-cols-3 gap-x-4 gap-y-2">
+            {getPlayerRemarks(player, allPlayers).map((remark, index) => (
+              <PlayerRemarkBanner key={index} {...remark} />
+            ))}
           </div>
         )}
-      </div>
 
-      <StatSection sectionTitle="Cost & Contribution" stats={costAndContributionStats} />
-      <StatSection sectionTitle="Discipline & Availability" stats={disciplineAndAvailabilityStats} />
-      <StatSection
-        sectionTitle={`${player.positionName} Statistics`}
-        stats={getPositionSpecificStats(player.positionShort)}
-      />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <StatSection sectionTitle="Cost & Contribution" stats={costAndContributionStats} />
+          <StatSection sectionTitle="Discipline & Availability" stats={disciplineAndAvailabilityStats} />
+          <StatSection
+            sectionTitle={`${player.positionName} Statistics`}
+            stats={getPositionSpecificStats(player.positionShort)}
+          />
+        </div>
+      </div>
     </div>
   );
 };

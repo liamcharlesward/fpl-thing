@@ -1,71 +1,93 @@
 :root {
   /* Arsenal */
-  --color-ars: rgb(156, 130, 74);
-  --color-ars-bg: rgba(239, 1, 7);
+  --color-ars: rgba(255, 215, 0, 1);
+  --color-ars-bg: rgba(239, 1, 7, 1);
+
   /* Aston Villa */
-  --color-avl: rgb(103, 14, 54);
-  --color-avl-bg: rgba(149, 191, 229, 1);
-  /* Burnley */
-  --color-bur: rgb(108, 29, 69);
-  --color-bur-bg: rgba(153, 214, 234, 1);
+  --color-avl: rgba(149, 191, 229, 1);
+  --color-avl-bg: rgba(103, 14, 54, 1);
+
   /* Bournemouth */
-  --color-bou: rgb(0, 0, 0);
-  --color-bou-bg: rgba(181, 14, 18, 1);
+  --color-bou: rgba(255, 255, 255, 1);
+  --color-bou-bg: rgba(218, 41, 28, 1);
+
   /* Brentford */
-  --color-bre: rgb(210, 0, 0);
-  --color-bre-bg: rgba(255, 255, 255, 1);
-  /* Brighton */
-  --color-bha: rgb(255, 255, 255);
+  --color-bre: rgba(255, 255, 255, 1);
+  --color-bre-bg: rgba(227, 6, 19, 1);
+
+  /* Brighton & Hove Albion */
+  --color-bha: rgba(255, 255, 255, 1);
   --color-bha-bg: rgba(0, 87, 184, 1);
+
+  /* Burnley */
+  --color-bur: rgba(153, 214, 234, 1);
+  --color-bur-bg: rgba(108, 29, 69, 1);
+
   /* Chelsea */
-  --color-che: rgb(3, 70, 148);
-  --color-che-bg: rgba(3, 70, 148, 0.3);
+  --color-che: rgba(255, 255, 255, 1);
+  --color-che-bg: rgba(3, 70, 148, 1);
+
   /* Crystal Palace */
-  --color-cry: rgb(196, 18, 46);
+  --color-cry: rgba(255, 255, 255, 1);
   --color-cry-bg: rgba(27, 69, 143, 1);
+
   /* Everton */
-  --color-eve: rgb(255, 255, 255);
-  --color-eve-bg: rgba(39, 68, 136, 1);
+  --color-eve: rgba(255, 255, 255, 1);
+  --color-eve-bg: rgba(0, 51, 153, 1);
+
   /* Fulham */
-  --color-ful: rgb(204, 0, 0);
+  --color-ful: rgba(255, 255, 255, 1);
   --color-ful-bg: rgba(0, 0, 0, 1);
-  /* Leeds */
-  --color-lee: rgb(255, 205, 0);
+
+  /* Leeds United */
+  --color-lee: rgba(0, 0, 82, 1);
   --color-lee-bg: rgba(255, 255, 255, 1);
+
   /* Liverpool */
-  --color-liv: rgb(239, 1, 7);
-  --color-liv-bg: rgba(239, 1, 7, 0.1);
-  /* Man City */
-  --color-mci: rgb(28, 44, 91);
+  --color-liv: rgba(255, 255, 255, 1);
+  --color-liv-bg: rgba(200, 16, 46, 1);
+
+  /* Manchester City */
+  --color-mci: rgba(28, 44, 91, 1);
   --color-mci-bg: rgba(108, 171, 221, 1);
-  /* Man United */
-  --color-mun: rgb(251, 225, 34);
+
+  /* Manchester United */
+  --color-mun: rgba(255, 229, 0, 1);
   --color-mun-bg: rgba(218, 41, 28, 1);
-  /* Newcastle */
-  --color-new: rgb(0, 0, 0);
-  --color-new-bg: rgba(255, 255, 255, 1);
+
+  /* Newcastle United */
+  --color-new: rgba(255, 255, 255, 1);
+  --color-new-bg: rgba(36, 31, 32, 1);
+
   /* Nottingham Forest */
-  --color-nfo: rgb(0, 0, 0);
+  --color-nfo: rgba(255, 255, 255, 1);
   --color-nfo-bg: rgba(221, 0, 0, 1);
+
   /* Sunderland */
-  --color-sun: rgb(235, 23, 43);
-  --color-sun-bg: rgba(255, 255, 255, 1);
+  --color-sun: rgba(255, 255, 255, 1);
+  --color-sun-bg: rgba(235, 23, 43, 1);
+
   /* Tottenham Hotspur */
-  --color-tot: rgb(255, 255, 255);
+  --color-tot: rgba(255, 255, 255, 1);
   --color-tot-bg: rgba(19, 34, 87, 1);
-  /* West Ham */
-  --color-whu: rgb(243, 212, 89);
+
+  /* West Ham United */
+  --color-whu: rgba(243, 212, 89, 1);
   --color-whu-bg: rgba(122, 38, 58, 1);
+
   /* Wolverhampton Wanderers */
-  --color-wol: rgb(35, 31, 32);
+  --color-wol: rgba(35, 31, 32, 1);
   --color-wol-bg: rgba(253, 185, 19, 1);
-  /* Coventry */
-  --color-cov: rgb(0, 0, 91);
+
+  /* Coventry City */
+  --color-cov: rgba(0, 0, 91, 1);
   --color-cov-bg: rgba(108, 171, 221, 1);
+
   /* Hull City */
-  --color-hul: rgb(0, 0, 0);
+  --color-hul: rgba(0, 0, 0, 1);
   --color-hul-bg: rgba(253, 185, 19, 1);
-  /* Ipswich */
-  --color-ips: rgb(230, 18, 46);
-  --color-ips-bg: rgba(27, 69, 143, 1);
+
+  /* Ipswich Town */
+  --color-ips: rgba(255, 255, 255, 1);
+  --color-ips-bg: rgba(0, 68, 136, 1);
 }

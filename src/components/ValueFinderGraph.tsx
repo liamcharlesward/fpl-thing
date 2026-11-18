@@ -1,7 +1,6 @@
 import React from "react";
 import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import type { ProcessedPlayer } from "../services/FplBootstrapService";
-import { Compass } from "lucide-react";
 
 interface VisualizerGraphProps {
   players: ProcessedPlayer[];
@@ -100,91 +99,73 @@ export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({ players, sele
   };
 
   return (
-    <div className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.35)] backdrop-blur-sm">
-      <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-300">
-          <Compass size={18} />
+    <div className="h-105 w-full rounded-xl border border-slate-800 bg-slate-950/40 p-2">
+      {players.length === 0 ? (
+        <div className="flex h-full items-center justify-center text-sm text-slate-400">
+          No player data fits the current filters.
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-slate-50">Value Finder</h3>
-          <p className="text-xs text-slate-400">Cost vs. points per match</p>
-        </div>
-      </div>
-
-      <div className="h-105 w-full rounded-xl border border-slate-800 bg-slate-950/40 p-2">
-        {players.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-sm text-slate-400">
-            No player data fits the current filters.
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart margin={{ top: 12, right: 16, bottom: 24, left: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.18)" />
-              <XAxis
-                type="number"
-                dataKey="cost"
-                name="Cost"
-                unit="m"
-                domain={["dataMin - 0.5", "dataMax + 0.5"]}
-                stroke="#94a3b8"
-                tick={{ fill: "#94a3b8", fontSize: 12 }}
-                label={{ value: "Player Price (£m)", position: "bottom", offset: 0, fill: "#94a3b8", fontSize: 12 }}
-              />
-              <YAxis
-                type="number"
-                dataKey="pointsPerMatch"
-                name="Points Per Match"
-                domain={[0, "dataMax + 0.5"]}
-                stroke="#94a3b8"
-                tick={{ fill: "#94a3b8", fontSize: 12 }}
-                label={{
-                  value: "Points Per Game (PPG)",
-                  angle: -90,
-                  position: "insideLeft",
-                  offset: 10,
-                  fill: "#94a3b8",
-                  fontSize: 12,
-                }}
-              />
-              <Tooltip
-                content={<CustomScatterTooltip />}
-                cursor={{ strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.18)" }}
-              />
-              <Scatter
-                name="Players"
-                data={players}
-                onClick={handleScatterClick}
-                cursor="pointer"
-                shape={CustomPoint}
-              />
-              <Legend
-                verticalAlign="top"
-                height={36}
-                content={() => (
-                  <div className="mb-3 flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-400">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full bg-cyan-300" />
-                      Goalkeeper
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full bg-green-400" />
-                      Defender
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full bg-violet-400" />
-                      Midfielder
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full bg-pink-400" />
-                      Forward
-                    </div>
+      ) : (
+        <ResponsiveContainer width="100%" height="100%">
+          <ScatterChart margin={{ top: 12, right: 16, bottom: 24, left: 8 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.18)" />
+            <XAxis
+              type="number"
+              dataKey="cost"
+              name="Cost"
+              unit="m"
+              domain={["dataMin - 0.5", "dataMax + 0.5"]}
+              stroke="#94a3b8"
+              tick={{ fill: "#94a3b8", fontSize: 12 }}
+              label={{ value: "Player Price (£m)", position: "bottom", offset: 0, fill: "#94a3b8", fontSize: 12 }}
+            />
+            <YAxis
+              type="number"
+              dataKey="pointsPerMatch"
+              name="Points Per Match"
+              domain={[0, "dataMax + 0.5"]}
+              stroke="#94a3b8"
+              tick={{ fill: "#94a3b8", fontSize: 12 }}
+              label={{
+                value: "Points Per Game (PPG)",
+                angle: -90,
+                position: "insideLeft",
+                offset: 10,
+                fill: "#94a3b8",
+                fontSize: 12,
+              }}
+            />
+            <Tooltip
+              content={<CustomScatterTooltip />}
+              cursor={{ strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.18)" }}
+            />
+            <Scatter name="Players" data={players} onClick={handleScatterClick} cursor="pointer" shape={CustomPoint} />
+            <Legend
+              verticalAlign="top"
+              height={36}
+              content={() => (
+                <div className="mb-3 flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-400">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-cyan-300" />
+                    Goalkeeper
                   </div>
-                )}
-              />
-            </ScatterChart>
-          </ResponsiveContainer>
-        )}
-      </div>
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-green-400" />
+                    Defender
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-violet-400" />
+                    Midfielder
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-pink-400" />
+                    Forward
+                  </div>
+                </div>
+              )}
+            />
+          </ScatterChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 };

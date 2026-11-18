@@ -35,6 +35,12 @@ export interface FplElement {
   threat: string;
   ict_index: string;
   starts: number;
+  clearances_blocks_interceptions: number;
+  recoveries: number;
+  tackles: number;
+  defensive_contribution: number;
+  goals_conceded: number;
+  expected_goals_conceded: number;
 }
 
 export interface FplBootstrapData {
@@ -70,6 +76,12 @@ export interface ProcessedPlayer {
   pointsPerMillion: number;
   pointsPerMatchPerMil: number;
   starts: number;
+  clearancesBlocksInterceptions: number;
+  recoveries: number;
+  tackles: number;
+  defensiveContribution: number;
+  goalsConceded: number;
+  expectedGoalsConceded: number;
 }
 
 export interface FplDataResult {
@@ -140,6 +152,12 @@ export async function fetchBootstrapData(): Promise<FplDataResult> {
       pointsPerMillion,
       pointsPerMatchPerMil,
       starts: el.starts,
+      clearancesBlocksInterceptions: el.clearances_blocks_interceptions,
+      recoveries: el.recoveries,
+      tackles: el.tackles,
+      defensiveContribution: el.defensive_contribution,
+      goalsConceded: el.goals_conceded,
+      expectedGoalsConceded: el.expected_goals_conceded,
     };
   });
 
