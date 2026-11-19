@@ -170,6 +170,8 @@ export const PlayerDetailLayout: React.FC<PlayerDetailLayoutProps> = ({ player, 
     { icon: LuShirt, label: "Starts", value: player.starts.toString() },
   ];
 
+  const remarks = getPlayerRemarks(player, allPlayers);
+
   return (
     <div>
       <div className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 gap-4 shadow-[0_12px_32px_rgba(15,23,42,0.35)] flex flex-col">
@@ -179,9 +181,9 @@ export const PlayerDetailLayout: React.FC<PlayerDetailLayoutProps> = ({ player, 
           {getStatusBadge(player.status)}
         </div>
 
-        {getPlayerRemarks(player, allPlayers).length != 0 && (
+        {remarks != undefined && (
           <div className="grid grid-cols-3 gap-x-4 gap-y-2">
-            {getPlayerRemarks(player, allPlayers).map((remark, index) => (
+            {remarks.map((remark, index) => (
               <PlayerRemarkBanner key={index} {...remark} />
             ))}
           </div>
