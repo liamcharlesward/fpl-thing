@@ -32,7 +32,7 @@ export const getDefenderRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
 //   return [];
 // }
 
-export const getPlayerRemarks = (currentPlayer: ProcessedPlayer, allPlayers: ProcessedPlayer[]): PlayerRemark[] => {
+export const getPlayerRemarks = (currentPlayer: ProcessedPlayer, allPlayers: ProcessedPlayer[]): PlayerRemark[] | undefined=> {
   const playerRemarks: PlayerRemark[] = [];
 
   if (currentPlayer.news) {
@@ -82,5 +82,7 @@ export const getPlayerRemarks = (currentPlayer: ProcessedPlayer, allPlayers: Pro
     case "GKP":
       // return playerRemarks.concat(getGoalkeeperRemarks(currentPlayer));
       break;
+
+    return undefined;
   }
 };
