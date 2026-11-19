@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useMatch } from "react-router-dom";
 import "./App.css";
 import { DashboardHeader } from "./components/DashboardHeader";
 import { Filters } from "./components/Filters";
@@ -6,19 +7,21 @@ import { ValueFinderGraph } from "./components/ValueFinderGraph";
 import { PlayerTable } from "./components/PlayerTable";
 import type { SortField, SortDirection } from "./components/PlayerTable";
 import { fetchBootstrapData } from "./services/FplBootstrapService";
-import { fetchHistoryData } from "./services/FplHistoryService";
 import type { ProcessedPlayer } from "./services/FplBootstrapService";
 import type { FplTeam, FplElementType } from "./services/FplBootstrapService";
 import { Activity, AlertTriangle } from "lucide-react";
 import { motion } from "motion/react";
-import { Modal } from "./components/Modal";
-import type { FplHistory } from "./services/FplHistoryService";
+import { PlayerPage } from "./pages/PlayerPage";
 import { Card } from "./components/Card";
 import { LuCompass } from "react-icons/lu";
 import { GiSoccerBall } from "react-icons/gi";
 import { getAverageMetric, getHighestMetricPlayer } from "./services/PlayerAveragesAndRecords";
 
-function App() {
+function AppContent() {
+  const navigate = useNavigate();
+  const playerMatch = useMatch("/player/:id");
+  const routePlayerId = playerMatch?.params.id ? Number(playerMatch.params.id) : null;
+
   const [loading, setLoading] = useState(true);
   const [isMock, setIsMock] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | undefined>(undefined);
@@ -38,9 +41,10 @@ function App() {
   const [sortField, setSortField] = useState<SortField>("pointsPerMatchPerMil");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
-  // Selected Player State
-  const [selectedPlayer, setSelectedPlayer] = useState<ProcessedPlayer | null>(null);
-  const [playerHistoryData, setPlayerHistoryData] = useState<FplHistory[] | null>(null);
+  const routePlayer = useMemo(() => {
+    if (!routePlayerId || Number.isNaN(routePlayerId)) return null;
+    return players.find((p) => p.id === routePlayerId) ?? null;
+  }, [players, routePlayerId]);
 
   const toggleFilters = () => {
     setFiltersVisible(!filtersVisible);
@@ -62,8 +66,6 @@ function App() {
         if (result.players.length > 0) {
           const maxP = Math.max(...result.players.map((p) => p.cost));
           setMaxPrice(maxP);
-        } else {
-          setSelectedPlayer(null);
         }
       } catch (err) {
         console.error("Failed to load data in App", err);
@@ -102,30 +104,6 @@ function App() {
       setSortField(field);
       setSortDirection("desc"); // Default to descending for new sort column
     }
-  };
-
-  // TODO: Update to element summary; will require work in FplHistoryService
-  const handlePlayerHistory = async (player: ProcessedPlayer) => {
-    try {
-      const { history } = await fetchHistoryData(player.id);
-
-      if (Array.isArray(history)) {
-        setPlayerHistoryData(history);
-      } else {
-        setPlayerHistoryData(null);
-      }
-
-      setSelectedPlayer(player);
-    } catch (err) {
-      console.warn("Player historical stats unavailable", err);
-      setPlayerHistoryData(null);
-      setSelectedPlayer(player);
-    }
-  };
-
-  const clearPlayerAndHistory = () => {
-    setSelectedPlayer(null);
-    setPlayerHistoryData(null);
   };
 
   // Filtered Players
@@ -206,88 +184,98 @@ function App() {
     );
   }
 
-  return (
-    <>
-      <motion.div className="min-h-screen bg-slate-950 px-4 py-5 text-slate-100 sm:px-6 lg:px-8" layout>
-        <div className="mx-auto flex max-w-[1600px] flex-col gap-5">
-          {/* Header */}
-          <DashboardHeader
-            isMock={isMock}
-            totalCount={filteredPlayers.length}
-            highestPpgName={stats.highestPpgName}
-            highestPpgValue={stats.highestPpgValue}
-            avgPpg={stats.avgPpg}
-          />
+  const dashboardView = (
+    <motion.div className="min-h-screen bg-slate-950 py-5 text-slate-100 px-4" layout>
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-4">
+        {/* Header */}
+        <DashboardHeader
+          isMock={isMock}
+          totalCount={filteredPlayers.length}
+          highestPpgName={stats.highestPpgName}
+          highestPpgValue={stats.highestPpgValue}
+          avgPpg={stats.avgPpg}
+        />
 
-          {/* Warning banner for CORS fallback */}
-          {/* FIXME: Mock FplData no longer exists. This fallback page should be a simple error page */}
-          {isMock && (
-            <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
-              <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-300" />
-              <div>
-                <strong>Demo Mode Enabled:</strong> The official FPL API lacks cross-origin (CORS) headers and was
-                unreachable from the browser.
-                {errorMsg && <span className="ml-2 text-amber-100/80">({errorMsg})</span>}
-              </div>
+        {/* Warning banner for CORS fallback */}
+        {/* FIXME: Mock FplData no longer exists. This fallback page should be a simple error page */}
+        {isMock && (
+          <div className="flex items-start gap-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+            <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-300" />
+            <div>
+              <strong>Demo Mode Enabled:</strong> The official FPL API lacks cross-origin (CORS) headers and was
+              unreachable from the browser.
+              {errorMsg && <span className="ml-2 text-amber-100/80">({errorMsg})</span>}
             </div>
-          )}
-
-          {/* Filter Options*/}
-          {/* TODO: RE-work filter UI */}
-          <Filters
-            search={search}
-            setSearch={setSearch}
-            selectedTeam={selectedTeam}
-            setSelectedTeam={setSelectedTeam}
-            selectedPosition={selectedPosition}
-            setSelectedPosition={setSelectedPosition}
-            minMinutes={minMinutes}
-            setMinMinutes={setMinMinutes}
-            maxPrice={maxPrice}
-            setMaxPrice={setMaxPrice}
-            teams={teams}
-            positions={positions}
-            onReset={handleResetFilters}
-            maxMinutesAvailable={maxMinutesInDataset}
-            highestPriceAvailable={maxPriceInDataset}
-            visible={filtersVisible}
-            visibilityToggle={toggleFilters}
-          />
-
-          {/* Main Grid: Visuals and Detail */}
-          <div className="grid gap-5 xl:grid-cols-[1.2fr_1fr]">
-            {/* Left Column: Visual Graph */}
-            <Card headerIcon={LuCompass} title="Player Value Graph">
-              <ValueFinderGraph
-                players={filteredPlayers}
-                selectedPlayer={selectedPlayer}
-                onSelectPlayer={handlePlayerHistory}
-              />
-            </Card>
-
-            {/* Right Column: Sidebar Stats card */}
-            {/* Player Leaderboard Table */}
-            <Card headerIcon={GiSoccerBall} title="Player Leaderboard">
-              <PlayerTable
-                players={sortedPlayers}
-                selectedPlayer={selectedPlayer}
-                onSelectPlayer={handlePlayerHistory}
-                sortField={sortField}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-            </Card>
           </div>
-        </div>
-      </motion.div>
+        )}
 
-      <Modal
-        selectedPlayer={selectedPlayer}
-        playerHistory={playerHistoryData}
-        allPlayers={players}
-        onClose={clearPlayerAndHistory}
+        {/* Filter Options*/}
+        {/* TODO: RE-work filter UI */}
+        <Filters
+          search={search}
+          setSearch={setSearch}
+          selectedTeam={selectedTeam}
+          setSelectedTeam={setSelectedTeam}
+          selectedPosition={selectedPosition}
+          setSelectedPosition={setSelectedPosition}
+          minMinutes={minMinutes}
+          setMinMinutes={setMinMinutes}
+          maxPrice={maxPrice}
+          setMaxPrice={setMaxPrice}
+          teams={teams}
+          positions={positions}
+          onReset={handleResetFilters}
+          maxMinutesAvailable={maxMinutesInDataset}
+          highestPriceAvailable={maxPriceInDataset}
+          visible={filtersVisible}
+          visibilityToggle={toggleFilters}
+        />
+
+        {/* Main Grid: Visuals and Detail */}
+        <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
+          {/* Left Column: Visual Graph */}
+          <Card headerIcon={LuCompass} title="Player Value Graph">
+            <ValueFinderGraph
+              players={filteredPlayers}
+              selectedPlayer={routePlayer}
+              onSelectPlayer={(player) => navigate(`/player/${player.id}`)}
+            />
+          </Card>
+
+          {/* Right Column: Sidebar Stats card */}
+          {/* Player Leaderboard Table */}
+          <Card headerIcon={GiSoccerBall} title="Player Leaderboard">
+            <PlayerTable
+              players={sortedPlayers}
+              selectedPlayer={routePlayer}
+              onSelectPlayer={(player) => navigate(`/player/${player.id}`)}
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={handleSort}
+            />
+          </Card>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <Routes>
+      <Route path="/" element={dashboardView} />
+      <Route
+        path="/player/:id"
+        element={<PlayerPage playerId={routePlayerId} allPlayers={players} onBack={() => navigate("/")} />}
       />
-    </>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 }
 

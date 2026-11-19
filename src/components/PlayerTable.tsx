@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import type { ProcessedPlayer } from "../services/FplBootstrapService";
 import { LuArrowUpDown, LuArrowUp, LuArrowDown, LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { Badge } from "./Badge";
+import { getPositionBadge } from "../services/PlayerBadgeService";
 
 export type SortField =
   | "webName"
@@ -56,20 +57,20 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
   };
 
   // TODO: Merge with function in PlayerDetailLayout and move into standalone service file
-  const getPositionBadgeStyle = (posShort: string) => {
-    switch (posShort) {
-      case "GKP":
-        return "border border-cyan-400/30 bg-cyan-500/10 text-cyan-200";
-      case "DEF":
-        return "border border-emerald-400/30 bg-emerald-500/10 text-emerald-200";
-      case "MID":
-        return "border border-violet-400/30 bg-violet-500/10 text-violet-200";
-      case "FWD":
-        return "border border-pink-400/30 bg-pink-500/10 text-pink-200";
-      default:
-        return "border border-slate-600 bg-slate-700 text-slate-200";
-    }
-  };
+  // const getPositionBadgeStyle = (posShort: string) => {
+  //   switch (posShort) {
+  //     case "GKP":
+  //       return "border border-cyan-400/30 bg-cyan-500/10 text-cyan-200";
+  //     case "DEF":
+  //       return "border border-emerald-400/30 bg-emerald-500/10 text-emerald-200";
+  //     case "MID":
+  //       return "border border-violet-400/30 bg-violet-500/10 text-violet-200";
+  //     case "FWD":
+  //       return "border border-pink-400/30 bg-pink-500/10 text-pink-200";
+  //     default:
+  //       return "border border-slate-600 bg-slate-700 text-slate-200";
+  //   }
+  // };
 
   const buildPageNumbers = (): (number | "…")[] => {
     if (totalPages <= 7) {
@@ -152,10 +153,13 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
                         <Badge text={p.teamShort} teamColour={p.teamShort.toLowerCase()} />
                       </td>
                       <td className="border-t border-slate-800 px-3 py-2.5">
-                        <span
-                          className={`inline-flex rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${getPositionBadgeStyle(p.positionShort)}`}
-                        >
-                          {p.positionShort}
+                        <span>
+                          {getPositionBadge({
+                            position: p.positionShort,
+                            hasBorder: true,
+                            hasIcon: false,
+                            longPosName: false,
+                          })}
                         </span>
                       </td>
                       <td className="border-t border-slate-800 px-3 py-2.5 text-right font-semibold text-cyan-300">
