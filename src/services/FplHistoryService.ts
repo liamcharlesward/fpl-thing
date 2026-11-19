@@ -22,7 +22,7 @@ export async function fetchHistoryData(elementId: number): Promise<FplHistoryRes
   try {
     const response = await fetch(`/api/element-summary/${elementId}`);
     if (!response.ok) {
-      throw new Error(`Could not get history data for player ID: ${elementId}. Response: ${response.text}`);
+      throw new Error(`Could not get history data for player ID: ${elementId}. Response: ${response.headers}`);
     }
 
     const payload: unknown = await response.json();
