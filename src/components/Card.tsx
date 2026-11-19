@@ -6,7 +6,7 @@ interface CardProps {
   headerIcon: IconType;
   title: string;
   subtitle?: string;
-  children?: ReactNode;
+  children?: ReactNode | ReactNode[];
 }
 
 export const Card: React.FC<CardProps> = (props) => {
@@ -24,7 +24,7 @@ export const Card: React.FC<CardProps> = (props) => {
           {props.subtitle && <p className="text-xs text-slate-400">{props.subtitle}</p>}
         </div>
       </div>
-      {props.children && props.children}
+      {props.children}
     </div>
   );
 };

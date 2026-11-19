@@ -28,7 +28,7 @@ import type { StatBoxProps } from "../components/StatBox";
 import { PlayerRemarkBanner } from "../components/PlayerRemarkBanner";
 import { StatSection } from "../components/StatSection";
 import { getPlayerRemarks } from "../services/PlayerRemarkService";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { fetchHistoryData } from "../services/FplHistoryService";
 import { getStatusBadge, getPositionBadge } from "../services/PlayerBadgeService";
 
@@ -38,7 +38,13 @@ interface PlayerPageProps {
   onBack: () => void;
 }
 
-const PlayerPageLayout = ({ children, onBack, header }) => {
+interface PlayerPageLayoutProps {
+  children: ReactNode | ReactNode[];
+  onBack: () => void;
+  header: string;
+}
+
+const PlayerPageLayout = ({ children, onBack, header }: PlayerPageLayoutProps) => {
   return (
     <div className="flex min-h-screen w-full flex-col bg-slate-950 px-4 py-4">
       <div className="flex w-full flex-1 flex-col gap-5">
@@ -53,7 +59,7 @@ const PlayerPageLayout = ({ children, onBack, header }) => {
           <h1 className="text-2xl">{header}</h1>
         </div>
 
-        <div className="flex flex-1 flex-col gap-4 rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 shadow-[0_12px_32px_rgba(15,23,42,0.35)] justify-center h-full">
+        <div className="flex flex-1 flex-col gap-4 rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 shadow-[0_12px_32px_rgba(15,23,42,0.35)] h-full">
           {children}
         </div>
       </div>
@@ -62,7 +68,7 @@ const PlayerPageLayout = ({ children, onBack, header }) => {
 };
 
 export const PlayerPage = ({ playerId, allPlayers, onBack }: PlayerPageProps) => {
-  const player = playerId !== null ? allPlayers.find((p) => p.id === playerId) : undefined;
+  const player = playerId !== null ? allPlayers.find((p) => p.id === playerId) : null;
 
   const [playerHistory, setPlayerHistory] = useState<FplHistory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -96,6 +102,18 @@ export const PlayerPage = ({ playerId, allPlayers, onBack }: PlayerPageProps) =>
       cancelled = true;
     };
   }, [player]);
+
+  if (!player) {
+    return (
+      <PlayerPageLayout onBack={onBack} header="Player not found.">
+        <LuTriangleAlert size={48} />
+        <p>
+          Either something has gone wrong, or you've entered an invalid player id in the url bar. Either way, there's
+          nothing to see here.
+        </p>
+      </PlayerPageLayout>
+    );
+  }
 
   const getPositionSpecificStats = (position: string): StatBoxProps[] => {
     switch (position) {
@@ -172,20 +190,12 @@ export const PlayerPage = ({ playerId, allPlayers, onBack }: PlayerPageProps) =>
 
   const remarks = getPlayerRemarks(player, allPlayers);
 
-  if (!player) {
-    return (
-      <PlayerPageLayout onBack={onBack} header="Player not found.">
-        <LuTriangleAlert size={48} />
-        Either something has gone wrong, or you've entered an invalid player id in the url bar. Either way, there's
-        nothing to see here.
-      </PlayerPageLayout>
-    );
-  }
-
   if (loading) {
     return (
       <PlayerPageLayout onBack={onBack} header={`${player.firstName} ${player.lastName}`}>
-        <LuLoader size={48} className="animate-spin place-self-center" />
+        <div className="flex flex-1 items-center justify-center">
+          <LuLoader size={48} className="animate-spin" />
+        </div>
       </PlayerPageLayout>
     );
   }
