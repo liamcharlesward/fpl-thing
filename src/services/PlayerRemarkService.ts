@@ -7,9 +7,9 @@ export interface PlayerRemark {
   text: string;
 }
 
-export const getGoalkeeperRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
-  return [];
-}
+// export const getGoalkeeperRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
+//   return [];
+// }
 
 export const getDefenderRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
   const defRemarks: PlayerRemark[] = [];
@@ -24,13 +24,13 @@ export const getDefenderRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
   return defRemarks;
 }
 
-export const getMidfielderRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
-  return [];
-}
+// export const getMidfielderRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
+//   return [];
+// }
 
-export const getForwardRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
-  return [];
-}
+// export const getForwardRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
+//   return [];
+// }
 
 export const getPlayerRemarks = (currentPlayer: ProcessedPlayer, allPlayers: ProcessedPlayer[]): PlayerRemark[] => {
   const playerRemarks: PlayerRemark[] = [];
@@ -72,12 +72,15 @@ export const getPlayerRemarks = (currentPlayer: ProcessedPlayer, allPlayers: Pro
   // Position-specific remarks
   switch (currentPlayer.positionShort) {
     case "FWD":
-      return playerRemarks.concat(getForwardRemarks(currentPlayer));
+      // return playerRemarks.concat(getForwardRemarks(currentPlayer));
+      break;
     case "MID":
-      return playerRemarks.concat(getMidfielderRemarks(currentPlayer));
+      // return playerRemarks.concat(getMidfielderRemarks(currentPlayer));
+      break;
     case "DEF":
       return playerRemarks.concat(getDefenderRemarks(currentPlayer));
     case "GKP":
-      return playerRemarks.concat(getGoalkeeperRemarks(currentPlayer));
+      // return playerRemarks.concat(getGoalkeeperRemarks(currentPlayer));
+      break;
   }
 };
