@@ -1,13 +1,28 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(
-    _req: VercelRequest,
+    req: VercelRequest,
     res: VercelResponse
 ) {
+    const { id } = req.query;
+    const elementId = Array.isArray(id) ? id[0] : id;
+
+    if (!elementId || !/^\d+$/.test(elementId)) {
+        return res.status(400).json({
+            error: 'A numeric player "id" query parameter is required.'
+        });
+    }
+
     try {
         const response = await fetch(
-            'https://fantasy.premierleague.com/api/element-summary/'
+            `https://fantasy.premierleague.com/api/element-summary/${elementId}/`
         );
+
+        if (!response.ok) {
+            return res.status(response.status).json({
+                error: `FPL API returned ${response.status} ${response.statusText}`
+            });
+        }
 
         const data = await response.json();
 
