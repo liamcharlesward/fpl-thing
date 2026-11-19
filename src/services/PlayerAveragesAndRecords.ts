@@ -8,7 +8,7 @@ export interface Percentiles {
   p25: number;
   p50: number;
   p75: number;
-  p95: number;
+  p99: number;
 }
 
 // Given a list of players, and a given metric, return the average value of that metric across given list of players
@@ -19,7 +19,7 @@ export const getAverageMetric = (players: ProcessedPlayer[], metric: NumericProc
 
 export const getMetricPercentiles = (players: ProcessedPlayer[], metric: NumericProcessedPlayerKey) => {
   if (players.length === 0) {
-    return { p25: 0, p50: 0, p75: 0, p90: 0 };
+    return { p25: 0, p50: 0, p75: 0, p99: 0 };
   }
 
   const values = players.map((player) => player[metric]).sort((a, b) => a - b);
@@ -36,13 +36,12 @@ export const getMetricPercentiles = (players: ProcessedPlayer[], metric: Numeric
     p25: getPercentile(25),
     p50: getPercentile(50),
     p75: getPercentile(75),
-    p95: getPercentile(95),
+    p99: getPercentile(99),
   };
 };
 
 // Given a list of players, and a given metric, return the player with the highest value of that metric
-export const getHighestMetricPlayer = (players: ProcessedPlayer[], metric: NumericProcessedPlayerKey): ProcessedPlayer | null => {
-  if (players.length === 0) return null;
+export const getHighestMetricPlayer = (players: ProcessedPlayer[], metric: NumericProcessedPlayerKey): ProcessedPlayer => {
   return players.reduce((highest, player) =>
     player[metric] > highest[metric] ? player : highest
   );

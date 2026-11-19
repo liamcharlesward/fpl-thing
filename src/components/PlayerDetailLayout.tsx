@@ -47,13 +47,13 @@ export const PlayerDetailLayout: React.FC<PlayerDetailLayoutProps> = ({ player, 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "a":
-        return <Badge icon={LuCheck} text="Available" className="text-emerald-600" border />;
+        return <Badge icon={LuCheck} text="Available" className="text-emerald-600 bg-emerald-600/10" border />;
       case "i":
-        return <Badge icon={LuBriefcaseMedical} text="Injured" className="text-rose-600" border />;
+        return <Badge icon={LuBriefcaseMedical} text="Injured" className="text-rose-600 bg-rose-600/10" border />;
       case "s":
-        return <Badge icon={LuGavel} text="Suspended" className="text-amber-600" border />;
+        return <Badge icon={LuGavel} text="Suspended" className="text-amber-600 bg-amber-600/10" border />;
       default:
-        return <Badge icon={LuPlaneTakeoff} text="Unavailable" className="text-slate-600" border />;
+        return <Badge icon={LuPlaneTakeoff} text="Unavailable" className="text-slate-600 bg-slate-600/10" border />;
     }
   };
 

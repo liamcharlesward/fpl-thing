@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { ProcessedPlayer } from "./FplBootstrapService";
 import { getMetricPercentiles } from "./PlayerAveragesAndRecords";
 
@@ -42,30 +43,30 @@ export const getPlayerRemarks = (currentPlayer: ProcessedPlayer, allPlayers: Pro
   const pointPercentiles = getMetricPercentiles(allPlayers, 'totalPoints');
   if (currentPlayer.totalPoints <= pointPercentiles.p25) {
     playerRemarks.push({type: "negative", text: "Bottom 25th percentile for total points"})
-  } else if (currentPlayer.totalPoints >= pointPercentiles.p50 && currentPlayer.totalPoints < pointPercentiles.p95) {
+  } else if (currentPlayer.totalPoints >= pointPercentiles.p50 && currentPlayer.totalPoints < pointPercentiles.p99) {
     playerRemarks.push({type: "positive", text: "Has scored above median total points"})
-  } else if (currentPlayer.totalPoints >= pointPercentiles.p95) {
-    playerRemarks.push({type: "gem", text: "Top 95th percentile for total points"})
+  } else if (currentPlayer.totalPoints >= pointPercentiles.p99) {
+    playerRemarks.push({type: "gem", text: "Top 99th percentile for total points"})
   }
 
   // Percentiles - PPM
   const ppmPercentiles = getMetricPercentiles(allPlayers, 'pointsPerMatch');
-  if (currentPlayer.totalPoints <= ppmPercentiles.p25) {
+  if (currentPlayer.pointsPerMatch <= ppmPercentiles.p25) {
     playerRemarks.push({type: "negative", text: "Bottom 25th percentile for points per match"})
-  } else if (currentPlayer.totalPoints >= ppmPercentiles.p50 && currentPlayer.totalPoints < ppmPercentiles.p95) {
+  } else if (currentPlayer.pointsPerMatch >= ppmPercentiles.p50 && currentPlayer.pointsPerMatch < ppmPercentiles.p99) {
     playerRemarks.push({type: "positive", text: "Has scored above median points per match"})
-  } else if (currentPlayer.totalPoints >= ppmPercentiles.p95) {
-    playerRemarks.push({type: "gem", text: "Top 95th percentile for points per match"})
+  } else if (currentPlayer.pointsPerMatch >= ppmPercentiles.p99) {
+    playerRemarks.push({type: "gem", text: "Top 99th percentile for points per match"})
   }
 
   // Percentiles - PPM/Mil
   const ppmPerMilPercentiles = getMetricPercentiles(allPlayers, 'pointsPerMatchPerMil');
-  if (currentPlayer.totalPoints <= ppmPerMilPercentiles.p25) {
+  if (currentPlayer.pointsPerMatchPerMil <= ppmPerMilPercentiles.p25) {
     playerRemarks.push({type: "negative", text: "Bottom 25th percentile for PPM/£m"})
-  } else if (currentPlayer.totalPoints >= ppmPerMilPercentiles.p50 && currentPlayer.totalPoints < ppmPerMilPercentiles.p95) {
+  } else if (currentPlayer.pointsPerMatchPerMil >= ppmPerMilPercentiles.p50 && currentPlayer.pointsPerMatchPerMil < ppmPerMilPercentiles.p99) {
     playerRemarks.push({type: "positive", text: "Has scored above median PPM/£m"})
-  } else if (currentPlayer.totalPoints >= ppmPerMilPercentiles.p95) {
-    playerRemarks.push({type: "gem", text: "Top 95th percentile for PPM/£m"})
+  } else if (currentPlayer.pointsPerMatchPerMil >= ppmPerMilPercentiles.p99) {
+    playerRemarks.push({type: "gem", text: "Top 99th percentile for PPM/£m"})
   }
 
   // Position-specific remarks
