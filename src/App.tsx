@@ -8,12 +8,12 @@ import type { SortField, SortDirection } from "./components/PlayerTable";
 import { fetchBootstrapData } from "./services/FplBootstrapService";
 import type { ProcessedPlayer } from "./services/FplBootstrapService";
 import type { FplTeam, FplElementType } from "./services/FplBootstrapService";
-import { motion } from "motion/react";
 import { PlayerPage } from "./pages/PlayerPage";
 import { Card } from "./components/Card";
-import { LuCompass, LuLoader, LuTriangleAlert, LuFilter } from "react-icons/lu";
+import { LuCompass, LuLoader, LuTriangleAlert, LuFilter, LuSearch } from "react-icons/lu";
 import { GiSoccerBall } from "react-icons/gi";
 import { Popover } from "radix-ui";
+import { Button } from "./components/Button";
 
 function AppContent() {
   const navigate = useNavigate();
@@ -28,8 +28,10 @@ function AppContent() {
 
   // Filter States
   const [search, setSearch] = useState("");
-  const [selectedTeam, setSelectedTeam] = useState<number | "all">("all");
-  const [selectedPosition, setSelectedPosition] = useState<number | "all">("all");
+  const [selectedTeams, setSelectedTeams] = useState<number[]>([
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+  ]);
+  const [selectedPositions, setSelectedPositions] = useState<number[]>([1, 2, 3, 4]);
   const [minMinutes, setMinMinutes] = useState(0);
   const [maxPrice, setMaxPrice] = useState(16.0);
 
@@ -82,8 +84,8 @@ function AppContent() {
   // Reset Filters Handler
   const handleResetFilters = () => {
     setSearch("");
-    setSelectedTeam("all");
-    setSelectedPosition("all");
+    setSelectedTeams([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
+    setSelectedPositions([1, 2, 3, 4]);
     setMinMinutes(0);
     setMaxPrice(maxPriceInDataset);
   };
@@ -109,10 +111,12 @@ function AppContent() {
         player.lastName.toLowerCase().includes(search.toLowerCase());
 
       // Team filter
-      const teamMatch = selectedTeam === "all" || player.teamId === selectedTeam;
+      // const teamMatch = selectedTeam === "all" || player.teamId === selectedTeam;
+      const teamMatch = selectedTeams.includes(player.teamId);
 
       // Position filter
-      const posMatch = selectedPosition === "all" || player.positionId === selectedPosition;
+      // const posMatch = selectedPosition === "all" || player.positionId === selectedPosition;
+      const posMatch = selectedPositions.includes(player.positionId);
 
       // Minutes filter
       const minMatch = player.minutes >= minMinutes;
@@ -122,7 +126,7 @@ function AppContent() {
 
       return nameMatch && teamMatch && posMatch && minMatch && costMatch;
     });
-  }, [players, search, selectedTeam, selectedPosition, minMinutes, maxPrice]);
+  }, [players, search, selectedTeams, selectedPositions, minMinutes, maxPrice]);
 
   // Sorted Players
   const sortedPlayers = useMemo(() => {
@@ -176,29 +180,44 @@ function AppContent() {
   }
 
   const dashboardView = (
-    <motion.div className="min-h-screen bg-slate-950 py-5 text-slate-100 px-4" layout>
+    <div className="min-h-screen bg-slate-950 py-5 text-slate-100 px-4">
       <div className="mx-auto flex max-w-[1600px] flex-col gap-4">
         {/* Header  */}
-        <header className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-5 shadow-[0_12px_34px_rgba(15,23,42,0.45)] backdrop-blur-sm">
+        <header className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-5 shadow-[0_12px_34px_rgba(15,23,42,0.45)] backdrop-blur-sm items-center">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-            <div>
+            {/* Left-hand side */}
+            <div className="flex flex-row h-full items-center w-1/2">
               <h1>FPL StatViewer</h1>
+              <div className="flex flex-1 ml-4 pl-4 border-l border-slate-700/70">
+                <div className="flex flex-1 items-center gap-4 rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-2.5">
+                  <LuSearch size={16} className="text-slate-400" />
+                  <input
+                    type="text"
+                    className="w-full border-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+                    placeholder="Search player name..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
+            {/* Right-hand side */}
             <div className="flex flex-row gap-4">
               {/* Filters */}
               <Popover.Root>
                 <Popover.Trigger asChild>
-                  <LuFilter size={16} className="cursor-pointer" onClick={(e) => e.preventDefault} />
+                  <Button>
+                    <LuFilter size={16} />
+                    <span>Filters</span>
+                  </Button>
                 </Popover.Trigger>
                 <Popover.Portal>
-                  <Popover.Content>
+                  <Popover.Content sideOffset={8} align="end" className="z-10">
                     <Filters
-                      search={search}
-                      setSearch={setSearch}
-                      selectedTeam={selectedTeam}
-                      setSelectedTeam={setSelectedTeam}
-                      selectedPosition={selectedPosition}
-                      setSelectedPosition={setSelectedPosition}
+                      selectedTeams={selectedTeams}
+                      setSelectedTeams={setSelectedTeams}
+                      selectedPositions={selectedPositions}
+                      setSelectedPositions={setSelectedPositions}
                       minMinutes={minMinutes}
                       setMinMinutes={setMinMinutes}
                       maxPrice={maxPrice}
@@ -240,7 +259,7 @@ function AppContent() {
           </Card>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 
   return (

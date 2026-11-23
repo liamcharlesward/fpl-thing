@@ -56,22 +56,6 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
     );
   };
 
-  // TODO: Merge with function in PlayerDetailLayout and move into standalone service file
-  // const getPositionBadgeStyle = (posShort: string) => {
-  //   switch (posShort) {
-  //     case "GKP":
-  //       return "border border-cyan-400/30 bg-cyan-500/10 text-cyan-200";
-  //     case "DEF":
-  //       return "border border-emerald-400/30 bg-emerald-500/10 text-emerald-200";
-  //     case "MID":
-  //       return "border border-violet-400/30 bg-violet-500/10 text-violet-200";
-  //     case "FWD":
-  //       return "border border-pink-400/30 bg-pink-500/10 text-pink-200";
-  //     default:
-  //       return "border border-slate-600 bg-slate-700 text-slate-200";
-  //   }
-  // };
-
   const buildPageNumbers = (): (number | "…")[] => {
     if (totalPages <= 7) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);

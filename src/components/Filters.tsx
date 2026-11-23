@@ -1,15 +1,14 @@
 import React from "react";
-import { LuSearch, LuRotateCcw } from "react-icons/lu";
+import { LuRotateCcw, LuCheck, LuChevronDown } from "react-icons/lu";
 import type { FplTeam, FplElementType } from "../services/FplBootstrapService";
 import { motion, AnimatePresence } from "motion/react";
+import { DropdownMenu, Slider } from "radix-ui";
 
 interface FiltersProps {
-  search: string;
-  setSearch: (val: string) => void;
-  selectedTeam: number | "all";
-  setSelectedTeam: (val: number | "all") => void;
-  selectedPosition: number | "all";
-  setSelectedPosition: (val: number | "all") => void;
+  selectedTeams: number[];
+  setSelectedTeams: (val: number[]) => void;
+  selectedPositions: number[];
+  setSelectedPositions: (val: number[]) => void;
   minMinutes: number;
   setMinMinutes: (val: number) => void;
   maxPrice: number;
@@ -22,12 +21,10 @@ interface FiltersProps {
 }
 
 export const Filters: React.FC<FiltersProps> = ({
-  search,
-  setSearch,
-  selectedTeam,
-  setSelectedTeam,
-  selectedPosition,
-  setSelectedPosition,
+  selectedTeams,
+  setSelectedTeams,
+  selectedPositions,
+  setSelectedPositions,
   minMinutes,
   setMinMinutes,
   maxPrice,
@@ -39,7 +36,7 @@ export const Filters: React.FC<FiltersProps> = ({
   highestPriceAvailable = 15.5,
 }) => {
   return (
-    <motion.section className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.35)] backdrop-blur-sm">
+    <motion.section className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.35)] backdrop-blur-lg w-2xl max-w-2xl">
       <AnimatePresence initial={false}>
         <motion.div
           initial={{ opacity: 0, height: 0 }}
@@ -48,98 +45,129 @@ export const Filters: React.FC<FiltersProps> = ({
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="overflow-hidden"
         >
-          <div className="grid gap-4 lg:grid-cols-[1.35fr_0.9fr_1.4fr]">
-            <div className="flex items-center gap-4 rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-2.5">
-              <LuSearch size={16} className="text-slate-400" />
-              <input
-                type="text"
-                className="w-full border-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
-                placeholder="Search player name..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-
-            <select
-              className="rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-2.5 text-sm text-slate-100 focus:border-sky-400 focus:outline-none"
-              value={selectedTeam}
-              onChange={(e) => {
-                const val = e.target.value;
-                setSelectedTeam(val === "all" ? "all" : parseInt(val));
-              }}
-            >
-              <option value="all">All teams</option>
-              {teams.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-
-            <div className="flex flex-wrap gap-4">
-              <button
-                type="button"
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                  selectedPosition === "all"
-                    ? "border-sky-400 bg-sky-500/15 text-sky-200"
-                    : "border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-500"
-                }`}
-                onClick={() => setSelectedPosition("all")}
-              >
-                All
-              </button>
-              {positions.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                    selectedPosition === p.id
-                      ? "border-violet-400 bg-violet-500/15 text-violet-200"
-                      : "border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-500"
-                  }`}
-                  onClick={() => setSelectedPosition(p.id)}
+          {/* Dropdows */}
+          <div className="grid gap-4 lg:grid-cols-2">
+            {/* TEAMS */}
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <div className="rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-2.5 text-sm text-slate-100 focus:border-sky-400 focus:outline-none flex flex-row items-center justify-between w-full cursor-pointer">
+                  <span>{selectedTeams.length === teams.length ? "All Teams" : `${selectedTeams.length} Teams`}</span>
+                  <LuChevronDown className="text-slate-400" size={16} />
+                </div>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Portal>
+                <DropdownMenu.Content
+                  sideOffset={6}
+                  className="z-50 min-w-50 max-h-60 overflow-y-auto rounded-xl border border-slate-700/80 bg-slate-900/95 p-1.5 shadow-xl backdrop-blur-md outline-none"
                 >
-                  {p.singular_name_short}
-                </button>
-              ))}
-            </div>
+                  {teams.map((t) => (
+                    <DropdownMenu.Item
+                      key={t.id}
+                      className="flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm text-slate-200 outline-none transition-colors hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setSelectedTeams(
+                          selectedTeams.includes(t.id)
+                            ? selectedTeams.filter((id) => id !== t.id)
+                            : [...selectedTeams, t.id],
+                        );
+                      }}
+                    >
+                      <span>{t.name}</span>
+                      {selectedTeams.includes(t.id) && <LuCheck className="text-cyan-400" size={16} />}
+                    </DropdownMenu.Item>
+                  ))}
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
+
+            {/* POSITIONS */}
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <div className="rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-2.5 text-sm text-slate-100 focus:border-sky-400 focus:outline-none flex flex-row items-center justify-between w-full cursor-pointer">
+                  <span>
+                    {selectedPositions.length === positions.length
+                      ? "All Positions"
+                      : selectedPositions.length === 2
+                        ? selectedPositions.map((p) => positions[p - 1].singular_name + "s").join(" and ")
+                        : selectedPositions.map((p) => positions[p - 1].singular_name + "s").join(", ")}
+                  </span>
+                  <LuChevronDown className="text-slate-400" size={16} />
+                </div>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Portal>
+                <DropdownMenu.Content
+                  sideOffset={6}
+                  className="z-50 min-w-50 max-h-60 overflow-y-auto rounded-xl border border-slate-700/80 bg-slate-900/95 p-1.5 shadow-xl backdrop-blur-md outline-none"
+                >
+                  {positions.map((p) => (
+                    <DropdownMenu.Item
+                      key={p.id}
+                      className="flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm text-slate-200 outline-none transition-colors hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setSelectedPositions(
+                          selectedPositions.includes(p.id)
+                            ? selectedPositions.filter((id) => id !== p.id)
+                            : [...selectedPositions, p.id],
+                        );
+                      }}
+                    >
+                      <span>{p.singular_name}</span>
+                      {selectedPositions.includes(p.id) && <LuCheck className="text-cyan-400" size={16} />}
+                    </DropdownMenu.Item>
+                  ))}
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
           </div>
 
-          <div className="mt-5 grid gap-5 border-t border-slate-700/70 pt-5 lg:grid-cols-2">
+          {/* Sliders */}
+          <div className="flex flex-col gap-4 pt-4 mt-4 border-t border-slate-700/70">
+            {/* Min Minutes Slider */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-slate-300">Min minutes played</span>
                 <span className="font-medium text-cyan-300">{minMinutes} mins</span>
               </div>
-              <input
-                type="range"
+              <Slider.Root
+                value={[minMinutes]}
+                onValueChange={([val]) => setMinMinutes(val)}
                 min={0}
                 max={maxMinutesAvailable}
                 step={90}
-                value={minMinutes}
-                onChange={(e) => setMinMinutes(parseInt(e.target.value))}
-                className="w-full"
-              />
+                className="relative flex w-full touch-none select-none items-center py-1 cursor-pointer"
+              >
+                <Slider.Track className="relative h-2 grow rounded-full bg-slate-800 border border-slate-700/80">
+                  <Slider.Range className="absolute h-full rounded-full bg-cyan-400" />
+                </Slider.Track>
+                <Slider.Thumb className="block h-4 w-4 rounded-full border-2 border-cyan-400 bg-slate-950 shadow-md transition-colors hover:scale-110 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900" />
+              </Slider.Root>
               <div className="flex justify-between text-[11px] text-slate-500">
                 <span>0</span>
                 <span>{maxMinutesAvailable} mins</span>
               </div>
             </div>
 
+            {/* Max Price Slider */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-slate-300">Max price (£)</span>
                 <span className="font-medium text-fuchsia-300">£{maxPrice.toFixed(1)}m</span>
               </div>
-              <input
-                type="range"
+              <Slider.Root
+                value={[maxPrice]}
+                onValueChange={([val]) => setMaxPrice(val)}
                 min={4.0}
                 max={highestPriceAvailable}
                 step={0.1}
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(parseFloat(e.target.value))}
-                className="w-full"
-              />
+                className="relative flex w-full touch-none select-none items-center py-1 cursor-pointer"
+              >
+                <Slider.Track className="relative h-2 grow rounded-full bg-slate-800 border border-slate-700/80">
+                  <Slider.Range className="absolute h-full rounded-full bg-fuchsia-400" />
+                </Slider.Track>
+                <Slider.Thumb className="block h-4 w-4 rounded-full border-2 border-fuchsia-400 bg-slate-950 shadow-md transition-colors hover:scale-110 focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:ring-offset-2 focus:ring-offset-slate-900" />
+              </Slider.Root>
               <div className="flex justify-between text-[11px] text-slate-500">
                 <span>£4.0m</span>
                 <span>£{highestPriceAvailable.toFixed(1)}m</span>
@@ -147,11 +175,11 @@ export const Filters: React.FC<FiltersProps> = ({
             </div>
           </div>
 
-          <div className="mt-5 flex justify-end">
+          <div className="mt-4 pt-4 border-t flex justify-end border-slate-700/70">
             <button
               type="button"
               onClick={onReset}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/90"
+              className="w-1/4 inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/90 cursor-pointer"
             >
               <LuRotateCcw size={14} />
               Reset Filters
