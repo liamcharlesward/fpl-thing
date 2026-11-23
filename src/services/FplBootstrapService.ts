@@ -41,6 +41,7 @@ export interface FplElement {
   defensive_contribution: number;
   goals_conceded: number;
   expected_goals_conceded: number;
+  saves: number;
 }
 
 export interface FplBootstrapData {
@@ -82,6 +83,7 @@ export interface ProcessedPlayer {
   defensiveContribution: number;
   goalsConceded: number;
   expectedGoalsConceded: number;
+  saves: number;
 }
 
 export interface FplDataResult {
@@ -158,6 +160,7 @@ export async function fetchBootstrapData(): Promise<FplDataResult> {
       defensiveContribution: el.defensive_contribution,
       goalsConceded: el.goals_conceded,
       expectedGoalsConceded: el.expected_goals_conceded,
+      saves: el.saves
     };
   });
 

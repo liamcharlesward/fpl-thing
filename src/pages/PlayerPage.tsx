@@ -118,14 +118,22 @@ export const PlayerPage = ({ playerId, allPlayers, onBack }: PlayerPageProps) =>
   const getPositionSpecificStats = (position: string): StatBoxProps[] => {
     switch (position) {
       case "FWD":
-      case "MID":
-        // Forwards & midfielders
         return [
-          { icon: LuGoal, label: "Goals Scored", value: player.goals.toString() },
+          { icon: LuGoal, label: "Goals", value: player.goals.toString() },
           { icon: LuHandshake, label: "Assists", value: player.assists.toString() },
+          { icon: LuSparkle, label: "Clean Sheets", value: player.cleanSheets.toString() },
         ];
+
+      case "MID":
+        return [
+          { icon: LuGoal, label: "Goals", value: player.goals.toString() },
+          { icon: LuHandshake, label: "Assists", value: player.assists.toString() },
+          { icon: LuSwords, label: "Tackles", value: player.tackles.toString() },
+          { icon: LuRotateCcw, label: "Recoveries", value: player.recoveries.toString() },
+          { icon: LuSparkle, label: "Clean Sheets", value: player.cleanSheets.toString() },
+        ];
+
       case "DEF":
-        // Defenders
         return [
           {
             icon: LuBan,
@@ -143,13 +151,23 @@ export const PlayerPage = ({ playerId, allPlayers, onBack }: PlayerPageProps) =>
             value: player.recoveries.toString(),
           },
           {
+            icon: LuGoal,
+            label: "Goals",
+            value: player.goals.toString(),
+          },
+          {
+            icon: LuHandshake,
+            label: "Assists",
+            value: player.assists.toString(),
+          },
+          {
             icon: LuSparkle,
             label: "Clean Sheets",
             value: player.cleanSheets.toString(),
           },
           {
             icon: LuShieldX,
-            label: "Goals Conceded (GC)",
+            label: "Goals Conceded",
             value: player.goalsConceded.toString(),
           },
           {
@@ -158,8 +176,17 @@ export const PlayerPage = ({ playerId, allPlayers, onBack }: PlayerPageProps) =>
             value: player.expectedGoalsConceded.toString(),
           },
         ];
+
+      case "GKP":
+        return [
+          { icon: LuSparkle, label: "Clean Sheets", value: player.cleanSheets.toString() },
+          { icon: LuShieldX, label: "Goals Conceded", value: player.goalsConceded.toString() },
+          { icon: LuShieldEllipsis, label: "xGC", value: player.expectedGoalsConceded.toString() },
+          { icon: LuBan, label: "Saves", value: player.saves.toString() },
+          { icon: LuRotateCcw, label: "Recoveries", value: player.recoveries.toString() },
+        ];
+
       default:
-        // Goalkeepers
         return [];
     }
   };

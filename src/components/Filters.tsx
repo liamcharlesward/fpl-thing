@@ -42,6 +42,9 @@ export const Filters: React.FC<FiltersProps> = ({
   maxMinutesAvailable = 3420,
   highestPriceAvailable = 15.5,
 }) => {
+  const multiSelectTailwindClasses =
+    "flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm text-slate-200 outline-none transition-colors hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white";
+
   return (
     <motion.section className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.35)] backdrop-blur-lg w-2xl max-w-xl">
       <AnimatePresence initial={false}>
@@ -52,7 +55,8 @@ export const Filters: React.FC<FiltersProps> = ({
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="overflow-hidden"
         >
-          {/* Dropdows */}
+          {/* Dropdownss */}
+          {/* TODO: Componentise multi-select */}
           <div className="grid gap-4 lg:grid-cols-2">
             {/* TEAMS */}
             <DropdownMenu.Root>
@@ -67,10 +71,22 @@ export const Filters: React.FC<FiltersProps> = ({
                   sideOffset={6}
                   className="z-50 min-w-50 max-h-60 overflow-y-auto rounded-xl border border-slate-700/80 bg-slate-900/95 p-1.5 shadow-xl backdrop-blur-md outline-none"
                 >
+                  <DropdownMenu.Item
+                    className={multiSelectTailwindClasses}
+                    onSelect={() =>
+                      selectedTeams.length === teams.length
+                        ? setSelectedTeams([])
+                        : setSelectedTeams([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+                    }
+                  >
+                    <span>All</span>
+                    {selectedTeams.length === teams.length && <LuCheck className="text-cyan-400" size={16} />}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Separator className="mb-1 pb-1 border-b border-slate-700/70" />
                   {teams.map((t) => (
                     <DropdownMenu.Item
                       key={t.id}
-                      className="flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm text-slate-200 outline-none transition-colors hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white"
+                      className={multiSelectTailwindClasses}
                       onSelect={(e) => {
                         e.preventDefault();
                         setSelectedTeams(
@@ -140,6 +156,7 @@ export const Filters: React.FC<FiltersProps> = ({
               step={90}
               sliderLabel="Minimum minutes played"
               suffix=" minutes"
+              accent="slate"
             />
 
             {/* Min Points Slider */}
@@ -151,6 +168,7 @@ export const Filters: React.FC<FiltersProps> = ({
               step={5}
               sliderLabel="Minimum points scored"
               suffix=" points"
+              accent="cyan"
             />
 
             {/* Max Price Slider */}
@@ -163,6 +181,7 @@ export const Filters: React.FC<FiltersProps> = ({
               sliderLabel="Maximum price"
               prefix="£"
               suffix="m"
+              accent="pink"
             />
           </div>
 
