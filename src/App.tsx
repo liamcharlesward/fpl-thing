@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useMatch } from "react-router-dom";
 import "./App.css";
-import { DashboardHeader } from "./components/DashboardHeader";
 import { Filters } from "./components/Filters";
 import { ValueFinderGraph } from "./components/ValueFinderGraph";
 import { PlayerTable } from "./components/PlayerTable";
@@ -9,13 +8,12 @@ import type { SortField, SortDirection } from "./components/PlayerTable";
 import { fetchBootstrapData } from "./services/FplBootstrapService";
 import type { ProcessedPlayer } from "./services/FplBootstrapService";
 import type { FplTeam, FplElementType } from "./services/FplBootstrapService";
-import { Activity, AlertTriangle } from "lucide-react";
 import { motion } from "motion/react";
 import { PlayerPage } from "./pages/PlayerPage";
 import { Card } from "./components/Card";
-import { LuCompass } from "react-icons/lu";
+import { LuCompass, LuLoader, LuTriangleAlert, LuFilter } from "react-icons/lu";
 import { GiSoccerBall } from "react-icons/gi";
-import { getAverageMetric, getHighestMetricPlayer } from "./services/PlayerAveragesAndRecords";
+import { Popover } from "radix-ui";
 
 function AppContent() {
   const navigate = useNavigate();
@@ -23,12 +21,10 @@ function AppContent() {
   const routePlayerId = playerMatch?.params.id ? Number(playerMatch.params.id) : null;
 
   const [loading, setLoading] = useState(true);
-  const [isMock, setIsMock] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | undefined>(undefined);
   const [players, setPlayers] = useState<ProcessedPlayer[]>([]);
   const [teams, setTeams] = useState<FplTeam[]>([]);
   const [positions, setPositions] = useState<FplElementType[]>([]);
-  const [filtersVisible, setFiltersVisible] = useState<boolean>(true);
 
   // Filter States
   const [search, setSearch] = useState("");
@@ -46,10 +42,6 @@ function AppContent() {
     return players.find((p) => p.id === routePlayerId) ?? null;
   }, [players, routePlayerId]);
 
-  const toggleFilters = () => {
-    setFiltersVisible(!filtersVisible);
-  };
-
   // Load initial data
   useEffect(() => {
     async function loadData() {
@@ -59,7 +51,6 @@ function AppContent() {
         setPlayers(result.players);
         setTeams(result.teams);
         setPositions(result.positions);
-        setIsMock(result.isMock);
         setErrorMsg(result.error);
 
         // Calculate max price dynamically if players loaded
@@ -73,6 +64,7 @@ function AppContent() {
         setLoading(false);
       }
     }
+    document.title = "FPL StatViewer";
     loadData();
   }, []);
 
@@ -151,30 +143,12 @@ function AppContent() {
     });
   }, [filteredPlayers, sortField, sortDirection]);
 
-  // Stats computed from currently filtered set
-  const stats = useMemo(() => {
-    if (filteredPlayers.length === 0) {
-      return {
-        highestPpgName: "N/A",
-        highestPpgValue: 0,
-        avgPpg: 0,
-      };
-    }
-
-    const highest = getHighestMetricPlayer(filteredPlayers, "pointsPerMatch");
-
-    return {
-      highestPpgName: highest.webName,
-      highestPpgValue: highest.pointsPerMatch,
-      avgPpg: getAverageMetric(filteredPlayers, "pointsPerMatch"),
-    };
-  }, [filteredPlayers]);
-
+  // Show whilst loading
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-200">
         <div className="flex flex-col items-center gap-4">
-          <Activity size={42} className="animate-spin text-cyan-400" />
+          <LuLoader size={42} className="animate-spin text-cyan-400" />
           <div className="text-center">
             <h3 className="text-lg font-semibold text-slate-50">Loading FPL Player Data...</h3>
             <p className="text-sm text-slate-400">Fetching stats and rendering visualizations</p>
@@ -184,56 +158,68 @@ function AppContent() {
     );
   }
 
+  // Return early if there was an error getting data from FPL API
+  if (errorMsg) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-200">
+        <div className="flex flex-col items-center gap-4">
+          <LuTriangleAlert size={42} className="text-cyan-400" />
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-slate-50">Something went wrong.</h3>
+            <p className="text-sm text-slate-400">
+              An error occurred, and StatViewer was not able to load data from the FPL API. Please try again later.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const dashboardView = (
     <motion.div className="min-h-screen bg-slate-950 py-5 text-slate-100 px-4" layout>
       <div className="mx-auto flex max-w-[1600px] flex-col gap-4">
-        {/* Header */}
-        <DashboardHeader
-          isMock={isMock}
-          totalCount={filteredPlayers.length}
-          highestPpgName={stats.highestPpgName}
-          highestPpgValue={stats.highestPpgValue}
-          avgPpg={stats.avgPpg}
-        />
-
-        {/* Warning banner for CORS fallback */}
-        {/* FIXME: Mock FplData no longer exists. This fallback page should be a simple error page */}
-        {isMock && (
-          <div className="flex items-start gap-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
-            <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-300" />
+        {/* Header  */}
+        <header className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-5 shadow-[0_12px_34px_rgba(15,23,42,0.45)] backdrop-blur-sm">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
             <div>
-              <strong>Demo Mode Enabled:</strong> The official FPL API lacks cross-origin (CORS) headers and was
-              unreachable from the browser.
-              {errorMsg && <span className="ml-2 text-amber-100/80">({errorMsg})</span>}
+              <h1>FPL StatViewer</h1>
+            </div>
+            <div className="flex flex-row gap-4">
+              {/* Filters */}
+              <Popover.Root>
+                <Popover.Trigger asChild>
+                  <LuFilter size={16} className="cursor-pointer" onClick={(e) => e.preventDefault} />
+                </Popover.Trigger>
+                <Popover.Portal>
+                  <Popover.Content>
+                    <Filters
+                      search={search}
+                      setSearch={setSearch}
+                      selectedTeam={selectedTeam}
+                      setSelectedTeam={setSelectedTeam}
+                      selectedPosition={selectedPosition}
+                      setSelectedPosition={setSelectedPosition}
+                      minMinutes={minMinutes}
+                      setMinMinutes={setMinMinutes}
+                      maxPrice={maxPrice}
+                      setMaxPrice={setMaxPrice}
+                      teams={teams}
+                      positions={positions}
+                      onReset={handleResetFilters}
+                      maxMinutesAvailable={maxMinutesInDataset}
+                      highestPriceAvailable={maxPriceInDataset}
+                    />
+                  </Popover.Content>
+                </Popover.Portal>
+              </Popover.Root>
             </div>
           </div>
-        )}
-
-        {/* Filter Options*/}
-        {/* TODO: RE-work filter UI */}
-        <Filters
-          search={search}
-          setSearch={setSearch}
-          selectedTeam={selectedTeam}
-          setSelectedTeam={setSelectedTeam}
-          selectedPosition={selectedPosition}
-          setSelectedPosition={setSelectedPosition}
-          minMinutes={minMinutes}
-          setMinMinutes={setMinMinutes}
-          maxPrice={maxPrice}
-          setMaxPrice={setMaxPrice}
-          teams={teams}
-          positions={positions}
-          onReset={handleResetFilters}
-          maxMinutesAvailable={maxMinutesInDataset}
-          highestPriceAvailable={maxPriceInDataset}
-          visible={filtersVisible}
-          visibilityToggle={toggleFilters}
-        />
+        </header>
 
         {/* Main Grid: Visuals and Detail */}
         <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
           {/* Left Column: Visual Graph */}
+          {/* TODO: Componentise graphs */}
           <Card headerIcon={LuCompass} title="Player Value Graph">
             <ValueFinderGraph
               players={filteredPlayers}
@@ -242,8 +228,6 @@ function AppContent() {
             />
           </Card>
 
-          {/* Right Column: Sidebar Stats card */}
-          {/* Player Leaderboard Table */}
           <Card headerIcon={GiSoccerBall} title="Player Leaderboard">
             <PlayerTable
               players={sortedPlayers}

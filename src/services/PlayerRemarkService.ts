@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { ProcessedPlayer } from "./FplBootstrapService";
 import { getMetricPercentiles } from "./PlayerAveragesAndRecords";
 
@@ -7,30 +6,82 @@ export interface PlayerRemark {
   text: string;
 }
 
-// export const getGoalkeeperRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
-//   return [];
-// }
+// Minimum sample sizes so tiny minute counts don't produce misleading remarks
+const MIN_MINUTES_FOR_RATES = 270; // ~3 full matches
+const MIN_STARTS_FOR_CLEAN_SHEET_RATE = 3;
 
-export const getDefenderRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
-  const defRemarks: PlayerRemark[] = [];
+const per90 = (value: number, minutes: number) => (minutes > 0 ? (value / minutes) * 90 : 0);
 
-  // xGC
-  if (player.goalsConceded < player.expectedGoalsConceded) {
-    defRemarks.push({ type: "positive", text: "Player outperforming xGC" })
-  } else if (player.goalsConceded > player.expectedGoalsConceded) {
-    defRemarks.push({ type: "negative", text: "Player underperforming xGC" })
+// Shared by goalkeepers and defenders
+const getGoalsConcededRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
+  const remarks: PlayerRemark[] = [];
+  const xgc = Number(player.expectedGoalsConceded) || 0;
+
+  if (player.goalsConceded < xgc) {
+    remarks.push({ type: "positive", text: "Player outperforming xGC" });
+  } else if (player.goalsConceded > xgc) {
+    remarks.push({ type: "negative", text: "Player underperforming xGC" });
+  }
+  return remarks;
+};
+
+export const getGoalkeeperRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
+  const remarks = getGoalsConcededRemarks(player);
+
+  if (player.starts >= MIN_STARTS_FOR_CLEAN_SHEET_RATE) {
+    const csRate = player.cleanSheets / player.starts;
+    if (csRate >= 0.4) {
+      remarks.push({ type: "positive", text: "Keeps a clean sheet in 40%+ of starts" });
+    } else if (csRate <= 0.15) {
+      remarks.push({ type: "negative", text: "Keeps a clean sheet in 15% or fewer of starts" });
+    }
   }
 
-  return defRemarks;
-}
+  return remarks;
+};
 
-// export const getMidfielderRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
-//   return [];
-// }
+export const getDefenderRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
+  return getGoalsConcededRemarks(player);
+};
 
-// export const getForwardRemarks = (player: ProcessedPlayer): PlayerRemark[] => {
-//   return [];
-// }
+// Shared by midfielders and forwards
+const getAttackingRemarks = (player: ProcessedPlayer, involvementThreshold: number): PlayerRemark[] => {
+  const remarks: PlayerRemark[] = [];
+
+  if (player.minutes >= MIN_MINUTES_FOR_RATES) {
+    const involvementsPer90 = per90(player.goals + player.assists, player.minutes);
+
+    if (involvementsPer90 >= involvementThreshold) {
+      remarks.push({
+        type: "positive",
+        text: `Strong attacking output (${involvementsPer90.toFixed(2)} goal involvements per 90)`,
+      });
+
+      // High output but low ownership
+      if (player.selectedByPercent < 5) {
+        remarks.push({ type: "gem", text: "Differential: high output, owned by under 5% of managers" });
+      }
+    } else if (involvementsPer90 < involvementThreshold / 3) {
+      remarks.push({ type: "negative", text: "Low attacking output for minutes played" });
+    }
+  }
+
+  // Playing style
+  if (player.goals + player.assists >= 4) {
+    if (player.goals >= player.assists * 2) {
+      remarks.push({ type: "information", text: "Mainly a goal threat" });
+    } else if (player.assists >= player.goals * 2) {
+      remarks.push({ type: "information", text: "Mainly a creator: assists outweigh goals" });
+    }
+  }
+
+  // Suspension risk
+  if (player.yellowCards >= 5) {
+    remarks.push({ type: "negative", text: `Booking-prone (${player.yellowCards} yellow cards)` });
+  }
+
+  return remarks;
+};
 
 export const getPlayerRemarks = (currentPlayer: ProcessedPlayer, allPlayers: ProcessedPlayer[]): PlayerRemark[] | undefined=> {
   const playerRemarks: PlayerRemark[] = [];
@@ -69,20 +120,17 @@ export const getPlayerRemarks = (currentPlayer: ProcessedPlayer, allPlayers: Pro
     playerRemarks.push({type: "gem", text: "Top 99th percentile for PPM/£m"})
   }
 
-  // Position-specific remarks
+    // Position-specific remarks
   switch (currentPlayer.positionShort) {
     case "FWD":
-      // return playerRemarks.concat(getForwardRemarks(currentPlayer));
-      break;
+      return playerRemarks.concat(getAttackingRemarks(currentPlayer, 0.6));
     case "MID":
-      // return playerRemarks.concat(getMidfielderRemarks(currentPlayer));
-      break;
+      return playerRemarks.concat(getAttackingRemarks(currentPlayer, 0.4));
     case "DEF":
       return playerRemarks.concat(getDefenderRemarks(currentPlayer));
     case "GKP":
-      // return playerRemarks.concat(getGoalkeeperRemarks(currentPlayer));
-      break;
-
-    return undefined;
+      return playerRemarks.concat(getGoalkeeperRemarks(currentPlayer));
+    default:
+      return playerRemarks;
+    };
   }
-};
