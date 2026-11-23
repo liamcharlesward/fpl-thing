@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useMatch } from "react-router-dom";
 import "./App.css";
 import { Filters } from "./components/Filters";
-import { ValueFinderGraph } from "./components/ValueFinderGraph";
+import { PlayerScatterChart } from "./components/PlayerScatterChart";
 import { PlayerTable } from "./components/PlayerTable";
 import type { SortField, SortDirection } from "./components/PlayerTable";
 import { fetchBootstrapData } from "./services/FplBootstrapService";
@@ -10,7 +10,7 @@ import type { ProcessedPlayer } from "./services/FplBootstrapService";
 import type { FplTeam, FplElementType } from "./services/FplBootstrapService";
 import { PlayerPage } from "./pages/PlayerPage";
 import { Card } from "./components/Card";
-import { LuCompass, LuLoader, LuTriangleAlert, LuFilter, LuSearch } from "react-icons/lu";
+import { LuLoader, LuTriangleAlert, LuFilter, LuSearch, LuDiff, LuGauge } from "react-icons/lu";
 import { GiSoccerBall } from "react-icons/gi";
 import { Popover } from "radix-ui";
 import { Button } from "./components/Button";
@@ -33,6 +33,7 @@ function AppContent() {
   ]);
   const [selectedPositions, setSelectedPositions] = useState<number[]>([1, 2, 3, 4]);
   const [minMinutes, setMinMinutes] = useState(0);
+  const [minPoints, setMinPoints] = useState(1);
   const [maxPrice, setMaxPrice] = useState(16.0);
 
   // Sorting States
@@ -76,6 +77,11 @@ function AppContent() {
     return Math.max(...players.map((p) => p.minutes), 90);
   }, [players]);
 
+  const maxPointsInDataset = useMemo(() => {
+    if (players.length === 0) return 3420;
+    return Math.max(...players.map((p) => p.totalPoints), 1);
+  }, [players]);
+
   const maxPriceInDataset = useMemo(() => {
     if (players.length === 0) return 16.0;
     return Math.max(...players.map((p) => p.cost), 10.0);
@@ -88,6 +94,7 @@ function AppContent() {
     setSelectedPositions([1, 2, 3, 4]);
     setMinMinutes(0);
     setMaxPrice(maxPriceInDataset);
+    setMinPoints(1);
   };
 
   // Sort Handler
@@ -111,12 +118,13 @@ function AppContent() {
         player.lastName.toLowerCase().includes(search.toLowerCase());
 
       // Team filter
-      // const teamMatch = selectedTeam === "all" || player.teamId === selectedTeam;
       const teamMatch = selectedTeams.includes(player.teamId);
 
       // Position filter
-      // const posMatch = selectedPosition === "all" || player.positionId === selectedPosition;
       const posMatch = selectedPositions.includes(player.positionId);
+
+      // Points filter
+      const pointsMatch = player.totalPoints >= minPoints;
 
       // Minutes filter
       const minMatch = player.minutes >= minMinutes;
@@ -124,9 +132,9 @@ function AppContent() {
       // Cost filter
       const costMatch = player.cost <= maxPrice;
 
-      return nameMatch && teamMatch && posMatch && minMatch && costMatch;
+      return nameMatch && teamMatch && posMatch && minMatch && pointsMatch && costMatch;
     });
-  }, [players, search, selectedTeams, selectedPositions, minMinutes, maxPrice]);
+  }, [players, search, selectedTeams, selectedPositions, minMinutes, minPoints, maxPrice]);
 
   // Sorted Players
   const sortedPlayers = useMemo(() => {
@@ -183,69 +191,95 @@ function AppContent() {
     <div className="min-h-screen bg-slate-950 py-5 text-slate-100 px-4">
       <div className="mx-auto flex max-w-[1600px] flex-col gap-4">
         {/* Header  */}
-        <header className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-5 shadow-[0_12px_34px_rgba(15,23,42,0.45)] backdrop-blur-sm items-center">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-            {/* Left-hand side */}
-            <div className="flex flex-row h-full items-center w-1/2">
-              <h1>FPL StatViewer</h1>
-              <div className="flex flex-1 ml-4 pl-4 border-l border-slate-700/70">
-                <div className="flex flex-1 items-center gap-4 rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-2.5">
-                  <LuSearch size={16} className="text-slate-400" />
-                  <input
-                    type="text"
-                    className="w-full border-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
-                    placeholder="Search player name..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
+        <header className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-5 shadow-[0_12px_34px_rgba(15,23,42,0.45)] backdrop-blur-sm items-center flex flex-row justify-between">
+          {/* Left-hand side */}
+          <div className="flex flex-1 flex-row h-full items-center">
+            <h1>FPL StatViewer</h1>
+            <div className="flex flex-1 ml-4 pl-4 border-l border-slate-700/70">
+              <div className="flex flex-1 items-center gap-4 rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-2.5">
+                <LuSearch size={16} className="text-slate-400" />
+                <input
+                  type="text"
+                  className="w-full border-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+                  placeholder="Search player name..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
               </div>
             </div>
-            {/* Right-hand side */}
-            <div className="flex flex-row gap-4">
-              {/* Filters */}
-              <Popover.Root>
-                <Popover.Trigger asChild>
-                  <Button>
-                    <LuFilter size={16} />
-                    <span>Filters</span>
-                  </Button>
-                </Popover.Trigger>
-                <Popover.Portal>
-                  <Popover.Content sideOffset={8} align="end" className="z-10">
-                    <Filters
-                      selectedTeams={selectedTeams}
-                      setSelectedTeams={setSelectedTeams}
-                      selectedPositions={selectedPositions}
-                      setSelectedPositions={setSelectedPositions}
-                      minMinutes={minMinutes}
-                      setMinMinutes={setMinMinutes}
-                      maxPrice={maxPrice}
-                      setMaxPrice={setMaxPrice}
-                      teams={teams}
-                      positions={positions}
-                      onReset={handleResetFilters}
-                      maxMinutesAvailable={maxMinutesInDataset}
-                      highestPriceAvailable={maxPriceInDataset}
-                    />
-                  </Popover.Content>
-                </Popover.Portal>
-              </Popover.Root>
-            </div>
+          </div>
+          {/* Right-hand side */}
+          <div className="flex h-full flex-row gap-4 ml-4 pl-4 border-l border-slate-700/70">
+            {/* Filters */}
+            <Popover.Root>
+              <Popover.Trigger asChild>
+                <Button>
+                  <LuFilter size={16} />
+                  <span>Filters</span>
+                </Button>
+              </Popover.Trigger>
+              <Popover.Portal>
+                <Popover.Content sideOffset={8} align="end" className="z-10">
+                  <Filters
+                    selectedTeams={selectedTeams}
+                    setSelectedTeams={setSelectedTeams}
+                    selectedPositions={selectedPositions}
+                    setSelectedPositions={setSelectedPositions}
+                    minMinutes={minMinutes}
+                    setMinMinutes={setMinMinutes}
+                    minPoints={minPoints}
+                    setMinPoints={setMinPoints}
+                    maxPrice={maxPrice}
+                    setMaxPrice={setMaxPrice}
+                    teams={teams}
+                    positions={positions}
+                    onReset={handleResetFilters}
+                    maxMinutesAvailable={maxMinutesInDataset}
+                    highestPriceAvailable={maxPriceInDataset}
+                    maxPointsAvailable={maxPointsInDataset}
+                  />
+                </Popover.Content>
+              </Popover.Portal>
+            </Popover.Root>
           </div>
         </header>
 
         {/* Main Grid: Visuals and Detail */}
-        <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
+        <div className="grid gap-4 xl:grid-cols-2">
           {/* Left Column: Visual Graph */}
           {/* TODO: Componentise graphs */}
-          <Card headerIcon={LuCompass} title="Player Value Graph">
-            <ValueFinderGraph
-              players={filteredPlayers}
-              selectedPlayer={routePlayer}
-              onSelectPlayer={(player) => navigate(`/player/${player.id}`)}
-            />
-          </Card>
+          <div className="flex flex-col gap-y-4">
+            <Card
+              headerIcon={LuGauge}
+              title="Player Value"
+              subtitle="Players in the top left (high points per match, low cost) demonstrate best value for money."
+            >
+              <PlayerScatterChart
+                players={filteredPlayers}
+                selectedPlayer={routePlayer}
+                onSelectPlayer={(player) => navigate(`/player/${player.id}`)}
+                xAxisMetric="cost"
+                xAxisLabel="Player Price (£m)"
+                yAxisMetric="pointsPerMatch"
+                yAxisLabel="Points per Match (PPM)"
+              />
+            </Card>
+            <Card
+              headerIcon={LuDiff}
+              title="Differentials"
+              subtitle="Players in the top left (high points scored, low selection) are most likely to make a difference in your league."
+            >
+              <PlayerScatterChart
+                players={filteredPlayers}
+                selectedPlayer={routePlayer}
+                onSelectPlayer={(player) => navigate(`/player/${player.id}`)}
+                yAxisMetric="totalPoints"
+                yAxisLabel="Total Points Scored"
+                xAxisMetric="selectedByPercent"
+                xAxisLabel="Selected (%)"
+              />
+            </Card>
+          </div>
 
           <Card headerIcon={GiSoccerBall} title="Player Leaderboard">
             <PlayerTable

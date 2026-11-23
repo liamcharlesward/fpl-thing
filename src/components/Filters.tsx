@@ -2,15 +2,18 @@ import React from "react";
 import { LuRotateCcw, LuCheck, LuChevronDown } from "react-icons/lu";
 import type { FplTeam, FplElementType } from "../services/FplBootstrapService";
 import { motion, AnimatePresence } from "motion/react";
-import { DropdownMenu, Slider } from "radix-ui";
+import { DropdownMenu } from "radix-ui";
+import { FilterSlider } from "./FilterSlider";
 
-interface FiltersProps {
+export interface FiltersProps {
   selectedTeams: number[];
   setSelectedTeams: (val: number[]) => void;
   selectedPositions: number[];
   setSelectedPositions: (val: number[]) => void;
   minMinutes: number;
   setMinMinutes: (val: number) => void;
+  minPoints: number;
+  setMinPoints: (val: number) => void;
   maxPrice: number;
   setMaxPrice: (val: number) => void;
   teams: FplTeam[];
@@ -18,6 +21,7 @@ interface FiltersProps {
   onReset: () => void;
   maxMinutesAvailable: number;
   highestPriceAvailable: number;
+  maxPointsAvailable: number;
 }
 
 export const Filters: React.FC<FiltersProps> = ({
@@ -27,16 +31,19 @@ export const Filters: React.FC<FiltersProps> = ({
   setSelectedPositions,
   minMinutes,
   setMinMinutes,
+  minPoints,
+  setMinPoints,
   maxPrice,
   setMaxPrice,
   teams,
   positions,
   onReset,
+  maxPointsAvailable = 100,
   maxMinutesAvailable = 3420,
   highestPriceAvailable = 15.5,
 }) => {
   return (
-    <motion.section className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.35)] backdrop-blur-lg w-2xl max-w-2xl">
+    <motion.section className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.35)] backdrop-blur-lg w-2xl max-w-xl">
       <AnimatePresence initial={false}>
         <motion.div
           initial={{ opacity: 0, height: 0 }}
@@ -125,61 +132,45 @@ export const Filters: React.FC<FiltersProps> = ({
           {/* Sliders */}
           <div className="flex flex-col gap-4 pt-4 mt-4 border-t border-slate-700/70">
             {/* Min Minutes Slider */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-300">Min minutes played</span>
-                <span className="font-medium text-cyan-300">{minMinutes} mins</span>
-              </div>
-              <Slider.Root
-                value={[minMinutes]}
-                onValueChange={([val]) => setMinMinutes(val)}
-                min={0}
-                max={maxMinutesAvailable}
-                step={90}
-                className="relative flex w-full touch-none select-none items-center py-1 cursor-pointer"
-              >
-                <Slider.Track className="relative h-2 grow rounded-full bg-slate-800 border border-slate-700/80">
-                  <Slider.Range className="absolute h-full rounded-full bg-cyan-400" />
-                </Slider.Track>
-                <Slider.Thumb className="block h-4 w-4 rounded-full border-2 border-cyan-400 bg-slate-950 shadow-md transition-colors hover:scale-110 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900" />
-              </Slider.Root>
-              <div className="flex justify-between text-[11px] text-slate-500">
-                <span>0</span>
-                <span>{maxMinutesAvailable} mins</span>
-              </div>
-            </div>
+            <FilterSlider
+              state={minMinutes}
+              stateCallback={setMinMinutes}
+              min={0}
+              max={maxMinutesAvailable}
+              step={90}
+              sliderLabel="Minimum minutes played"
+              suffix=" minutes"
+            />
+
+            {/* Min Points Slider */}
+            <FilterSlider
+              state={minPoints}
+              stateCallback={setMinPoints}
+              min={0}
+              max={maxPointsAvailable}
+              step={5}
+              sliderLabel="Minimum points scored"
+              suffix=" points"
+            />
 
             {/* Max Price Slider */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-300">Max price (£)</span>
-                <span className="font-medium text-fuchsia-300">£{maxPrice.toFixed(1)}m</span>
-              </div>
-              <Slider.Root
-                value={[maxPrice]}
-                onValueChange={([val]) => setMaxPrice(val)}
-                min={4.0}
-                max={highestPriceAvailable}
-                step={0.1}
-                className="relative flex w-full touch-none select-none items-center py-1 cursor-pointer"
-              >
-                <Slider.Track className="relative h-2 grow rounded-full bg-slate-800 border border-slate-700/80">
-                  <Slider.Range className="absolute h-full rounded-full bg-fuchsia-400" />
-                </Slider.Track>
-                <Slider.Thumb className="block h-4 w-4 rounded-full border-2 border-fuchsia-400 bg-slate-950 shadow-md transition-colors hover:scale-110 focus:outline-none focus:ring-2 focus:ring-fuchsia-400 focus:ring-offset-2 focus:ring-offset-slate-900" />
-              </Slider.Root>
-              <div className="flex justify-between text-[11px] text-slate-500">
-                <span>£4.0m</span>
-                <span>£{highestPriceAvailable.toFixed(1)}m</span>
-              </div>
-            </div>
+            <FilterSlider
+              state={maxPrice}
+              stateCallback={setMaxPrice}
+              min={0}
+              max={highestPriceAvailable}
+              step={0.5}
+              sliderLabel="Maximum price"
+              prefix="£"
+              suffix="m"
+            />
           </div>
 
           <div className="mt-4 pt-4 border-t flex justify-end border-slate-700/70">
             <button
               type="button"
               onClick={onReset}
-              className="w-1/4 inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/90 cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800/90 cursor-pointer"
             >
               <LuRotateCcw size={14} />
               Reset Filters

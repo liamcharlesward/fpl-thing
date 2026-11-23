@@ -1,6 +1,6 @@
 import type { ProcessedPlayer } from "./FplBootstrapService";
 
-type NumericProcessedPlayerKey = {
+export type NumericProcessedPlayerKey = {
   [K in keyof ProcessedPlayer]: ProcessedPlayer[K] extends number ? K : never;
 } [keyof ProcessedPlayer]
 

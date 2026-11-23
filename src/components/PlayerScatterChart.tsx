@@ -1,11 +1,16 @@
 import React from "react";
 import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import type { ProcessedPlayer } from "../services/FplBootstrapService";
+import type { NumericProcessedPlayerKey } from "../services/PlayerAveragesAndRecords";
 
-interface VisualizerGraphProps {
+interface PlayerScatterGraphProps {
   players: ProcessedPlayer[];
   selectedPlayer: ProcessedPlayer | null;
   onSelectPlayer: (player: ProcessedPlayer) => void;
+  xAxisMetric: NumericProcessedPlayerKey;
+  xAxisLabel: string;
+  yAxisMetric: NumericProcessedPlayerKey;
+  yAxisLabel: string;
 }
 
 interface ScatterTooltipProps {
@@ -69,7 +74,15 @@ const CustomScatterTooltip = ({ active, payload }: ScatterTooltipProps) => {
   );
 };
 
-export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({ players, selectedPlayer, onSelectPlayer }) => {
+export const PlayerScatterChart: React.FC<PlayerScatterGraphProps> = ({
+  players,
+  selectedPlayer,
+  onSelectPlayer,
+  xAxisMetric,
+  xAxisLabel,
+  yAxisMetric,
+  yAxisLabel,
+}) => {
   const handleScatterClick = (node: { payload?: ProcessedPlayer } | undefined) => {
     if (node && node.payload) {
       onSelectPlayer(node.payload);
@@ -110,23 +123,22 @@ export const ValueFinderGraph: React.FC<VisualizerGraphProps> = ({ players, sele
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.18)" />
             <XAxis
               type="number"
-              dataKey="cost"
-              name="Cost"
-              unit="m"
+              dataKey={xAxisMetric}
+              name={xAxisMetric}
               domain={["dataMin - 0.5", "dataMax + 0.5"]}
               stroke="#94a3b8"
               tick={{ fill: "#94a3b8", fontSize: 12 }}
-              label={{ value: "Player Price (£m)", position: "bottom", offset: 0, fill: "#94a3b8", fontSize: 12 }}
+              label={{ value: xAxisLabel, position: "bottom", offset: 0, fill: "#94a3b8", fontSize: 12 }}
             />
             <YAxis
               type="number"
-              dataKey="pointsPerMatch"
-              name="Points Per Match"
+              dataKey={yAxisMetric}
+              name={yAxisMetric}
               domain={[0, "dataMax + 0.5"]}
               stroke="#94a3b8"
               tick={{ fill: "#94a3b8", fontSize: 12 }}
               label={{
-                value: "Points Per Game (PPG)",
+                value: yAxisLabel,
                 angle: -90,
                 position: "insideLeft",
                 offset: 10,
