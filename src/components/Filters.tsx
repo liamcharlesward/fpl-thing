@@ -1,9 +1,9 @@
 import React from "react";
-import { LuRotateCcw, LuCheck, LuChevronDown } from "react-icons/lu";
+import { LuRotateCcw } from "react-icons/lu";
 import type { FplTeam, FplElementType } from "../services/FplBootstrapService";
 import { motion, AnimatePresence } from "motion/react";
-import { DropdownMenu } from "radix-ui";
 import { FilterSlider } from "./FilterSlider";
+import { DropdownMultiSelect, type DropdownMultiSelectOption } from "./DropdownMultiSelect";
 
 export interface FiltersProps {
   selectedTeams: number[];
@@ -42,11 +42,18 @@ export const Filters: React.FC<FiltersProps> = ({
   maxMinutesAvailable = 3420,
   highestPriceAvailable = 15.5,
 }) => {
-  const multiSelectTailwindClasses =
-    "flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm text-slate-200 outline-none transition-colors hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white";
+  const teamMultiSelectOptions: DropdownMultiSelectOption[] = teams.map((team) => ({
+    id: team.id,
+    name: team.name,
+  }));
+
+  const positionMultiSelectOptions: DropdownMultiSelectOption[] = positions.map((position) => ({
+    id: position.id,
+    name: position.singular_name,
+  }));
 
   return (
-    <motion.section className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.35)] backdrop-blur-lg w-2xl max-w-xl">
+    <motion.section className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.35)] backdrop-blur-lg w-xl">
       <AnimatePresence initial={false}>
         <motion.div
           initial={{ opacity: 0, height: 0 }}
@@ -55,94 +62,22 @@ export const Filters: React.FC<FiltersProps> = ({
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="overflow-hidden"
         >
-          {/* Dropdownss */}
-          {/* TODO: Componentise multi-select */}
+          {/* Dropdowns */}
           <div className="grid gap-4 lg:grid-cols-2">
-            {/* TEAMS */}
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger asChild>
-                <div className="rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-2.5 text-sm text-slate-100 focus:border-sky-400 focus:outline-none flex flex-row items-center justify-between w-full cursor-pointer">
-                  <span>{selectedTeams.length === teams.length ? "All Teams" : `${selectedTeams.length} Teams`}</span>
-                  <LuChevronDown className="text-slate-400" size={16} />
-                </div>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Portal>
-                <DropdownMenu.Content
-                  sideOffset={6}
-                  className="z-50 min-w-50 max-h-60 overflow-y-auto rounded-xl border border-slate-700/80 bg-slate-900/95 p-1.5 shadow-xl backdrop-blur-md outline-none"
-                >
-                  <DropdownMenu.Item
-                    className={multiSelectTailwindClasses}
-                    onSelect={() =>
-                      selectedTeams.length === teams.length
-                        ? setSelectedTeams([])
-                        : setSelectedTeams([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
-                    }
-                  >
-                    <span>All</span>
-                    {selectedTeams.length === teams.length && <LuCheck className="text-cyan-400" size={16} />}
-                  </DropdownMenu.Item>
-                  <DropdownMenu.Separator className="mb-1 pb-1 border-b border-slate-700/70" />
-                  {teams.map((t) => (
-                    <DropdownMenu.Item
-                      key={t.id}
-                      className={multiSelectTailwindClasses}
-                      onSelect={(e) => {
-                        e.preventDefault();
-                        setSelectedTeams(
-                          selectedTeams.includes(t.id)
-                            ? selectedTeams.filter((id) => id !== t.id)
-                            : [...selectedTeams, t.id],
-                        );
-                      }}
-                    >
-                      <span>{t.name}</span>
-                      {selectedTeams.includes(t.id) && <LuCheck className="text-cyan-400" size={16} />}
-                    </DropdownMenu.Item>
-                  ))}
-                </DropdownMenu.Content>
-              </DropdownMenu.Portal>
-            </DropdownMenu.Root>
+            <DropdownMultiSelect
+              options={teamMultiSelectOptions}
+              selected={selectedTeams}
+              showAllOption
+              label="Teams"
+              setSelected={setSelectedTeams}
+            />
 
-            {/* POSITIONS */}
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger asChild>
-                <div className="rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-2.5 text-sm text-slate-100 focus:border-sky-400 focus:outline-none flex flex-row items-center justify-between w-full cursor-pointer">
-                  <span>
-                    {selectedPositions.length === positions.length
-                      ? "All Positions"
-                      : selectedPositions.length === 2
-                        ? selectedPositions.map((p) => positions[p - 1].singular_name + "s").join(" and ")
-                        : selectedPositions.map((p) => positions[p - 1].singular_name + "s").join(", ")}
-                  </span>
-                  <LuChevronDown className="text-slate-400" size={16} />
-                </div>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Portal>
-                <DropdownMenu.Content
-                  sideOffset={6}
-                  className="z-50 min-w-50 max-h-60 overflow-y-auto rounded-xl border border-slate-700/80 bg-slate-900/95 p-1.5 shadow-xl backdrop-blur-md outline-none"
-                >
-                  {positions.map((p) => (
-                    <DropdownMenu.Item
-                      key={p.id}
-                      className="flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm text-slate-200 outline-none transition-colors hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white"
-                      onSelect={(e) => {
-                        e.preventDefault();
-                        setSelectedPositions(
-                          selectedPositions.includes(p.id)
-                            ? selectedPositions.filter((id) => id !== p.id)
-                            : [...selectedPositions, p.id],
-                        );
-                      }}
-                    >
-                      <span>{p.singular_name}</span>
-                      {selectedPositions.includes(p.id) && <LuCheck className="text-cyan-400" size={16} />}
-                    </DropdownMenu.Item>
-                  ))}
-                </DropdownMenu.Content>
-              </DropdownMenu.Portal>
-            </DropdownMenu.Root>
+            <DropdownMultiSelect
+              options={positionMultiSelectOptions}
+              selected={selectedPositions}
+              label="Positions"
+              setSelected={setSelectedPositions}
+            />
           </div>
 
           {/* Sliders */}

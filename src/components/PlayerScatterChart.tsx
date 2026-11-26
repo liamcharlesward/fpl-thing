@@ -48,14 +48,14 @@ const CustomScatterTooltip = ({ active, payload }: ScatterTooltipProps) => {
 
   return (
     <div className="rounded-xl border border-slate-700 bg-slate-900/95 p-3 shadow-2xl">
-      <div className="text-sm font-bold text-slate-50">{player.webName}</div>
+      <div className="text-sm font-bold text-slate-50">{player.web_name}</div>
       <div className="mb-2 text-[11px] text-slate-400">
-        {player.teamShort} • {player.positionShort}
+        {player.team_short} • {player.position_short}
       </div>
       <div className="space-y-1 text-xs text-slate-300">
         <div className="flex items-center justify-between gap-4">
           <span>Points / match</span>
-          <span className="font-semibold text-cyan-300">{player.pointsPerMatch.toFixed(1)}</span>
+          <span className="font-semibold text-cyan-300">{player.points_per_game.toFixed(1)}</span>
         </div>
         <div className="flex items-center justify-between gap-4">
           <span>Cost</span>
@@ -63,11 +63,11 @@ const CustomScatterTooltip = ({ active, payload }: ScatterTooltipProps) => {
         </div>
         <div className="flex items-center justify-between gap-4">
           <span>Total</span>
-          <span>{player.totalPoints} pts</span>
+          <span>{player.total_points} pts</span>
         </div>
         <div className="flex items-center justify-between gap-4">
           <span>Pts / £m</span>
-          <span className="font-semibold text-fuchsia-300">{player.pointsPerMillion.toFixed(1)}</span>
+          <span className="font-semibold text-fuchsia-300">{player.points_per_million.toFixed(1)}</span>
         </div>
       </div>
     </div>
@@ -100,7 +100,7 @@ export const PlayerScatterChart: React.FC<PlayerScatterGraphProps> = ({
         cx={props.cx}
         cy={props.cy}
         r={isSelected ? 5 : 3.5}
-        fill={getPositionColor(payload.positionId)}
+        fill={getPositionColor(payload.position_id)}
         stroke={isSelected ? "#f8fafc" : "rgba(15,23,42,0.8)"}
         strokeWidth={isSelected ? 2 : 1}
         style={{
@@ -110,6 +110,12 @@ export const PlayerScatterChart: React.FC<PlayerScatterGraphProps> = ({
       />
     );
   };
+
+  const chartPlayers = players.filter((player) => {
+    const x = Number(player[xAxisMetric]);
+    const y = Number(player[yAxisMetric]);
+    return Number.isFinite(x) && Number.isFinite(y);
+  });
 
   return (
     <div className="h-105 w-full rounded-xl border border-slate-800 bg-slate-950/40 p-2">
@@ -150,7 +156,13 @@ export const PlayerScatterChart: React.FC<PlayerScatterGraphProps> = ({
               content={<CustomScatterTooltip />}
               cursor={{ strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.18)" }}
             />
-            <Scatter name="Players" data={players} onClick={handleScatterClick} cursor="pointer" shape={CustomPoint} />
+            <Scatter
+              name="Players"
+              data={chartPlayers}
+              onClick={handleScatterClick}
+              cursor="pointer"
+              shape={(props: ScatterPointProps) => <CustomPoint {...props} />}
+            />
             <Legend
               verticalAlign="top"
               height={36}

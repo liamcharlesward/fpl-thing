@@ -11,15 +11,7 @@ import {
   LuClock,
   LuPercent,
   LuShirt,
-  LuGoal,
-  LuHandshake,
   LuChartBarIncreasing,
-  LuSwords,
-  LuRotateCcw,
-  LuBan,
-  LuSparkle,
-  LuShieldX,
-  LuShieldEllipsis,
   LuLoader,
   LuArrowLeft,
 } from "react-icons/lu";
@@ -31,6 +23,7 @@ import { getPlayerRemarks } from "../services/PlayerRemarkService";
 import { useEffect, useState, type ReactNode } from "react";
 import { fetchHistoryData } from "../services/FplHistoryService";
 import { getStatusBadge, getPositionBadge } from "../services/PlayerBadgeService";
+import { getPositionSpecificStats } from "../services/PlayerPositionSpecificStatService";
 
 interface PlayerPageProps {
   playerId: number | null;
@@ -115,94 +108,18 @@ export const PlayerPage = ({ playerId, allPlayers, onBack }: PlayerPageProps) =>
     );
   }
 
-  const getPositionSpecificStats = (position: string): StatBoxProps[] => {
-    switch (position) {
-      case "FWD":
-        return [
-          { icon: LuGoal, label: "Goals", value: player.goals.toString() },
-          { icon: LuHandshake, label: "Assists", value: player.assists.toString() },
-          { icon: LuSparkle, label: "Clean Sheets", value: player.cleanSheets.toString() },
-        ];
-
-      case "MID":
-        return [
-          { icon: LuGoal, label: "Goals", value: player.goals.toString() },
-          { icon: LuHandshake, label: "Assists", value: player.assists.toString() },
-          { icon: LuSwords, label: "Tackles", value: player.tackles.toString() },
-          { icon: LuRotateCcw, label: "Recoveries", value: player.recoveries.toString() },
-          { icon: LuSparkle, label: "Clean Sheets", value: player.cleanSheets.toString() },
-        ];
-
-      case "DEF":
-        return [
-          {
-            icon: LuBan,
-            label: "CBI",
-            value: player.clearancesBlocksInterceptions.toString(),
-          },
-          {
-            icon: LuSwords,
-            label: "Tackles",
-            value: player.tackles.toString(),
-          },
-          {
-            icon: LuRotateCcw,
-            label: "Recoveries",
-            value: player.recoveries.toString(),
-          },
-          {
-            icon: LuGoal,
-            label: "Goals",
-            value: player.goals.toString(),
-          },
-          {
-            icon: LuHandshake,
-            label: "Assists",
-            value: player.assists.toString(),
-          },
-          {
-            icon: LuSparkle,
-            label: "Clean Sheets",
-            value: player.cleanSheets.toString(),
-          },
-          {
-            icon: LuShieldX,
-            label: "Goals Conceded",
-            value: player.goalsConceded.toString(),
-          },
-          {
-            icon: LuShieldEllipsis,
-            label: "xGC",
-            value: player.expectedGoalsConceded.toString(),
-          },
-        ];
-
-      case "GKP":
-        return [
-          { icon: LuSparkle, label: "Clean Sheets", value: player.cleanSheets.toString() },
-          { icon: LuShieldX, label: "Goals Conceded", value: player.goalsConceded.toString() },
-          { icon: LuShieldEllipsis, label: "xGC", value: player.expectedGoalsConceded.toString() },
-          { icon: LuBan, label: "Saves", value: player.saves.toString() },
-          { icon: LuRotateCcw, label: "Recoveries", value: player.recoveries.toString() },
-        ];
-
-      default:
-        return [];
-    }
-  };
-
   const costAndContributionStats: StatBoxProps[] = [
     { icon: LuPoundSterling, label: "Cost", value: `£${player.cost.toFixed(1)}m` },
-    { icon: LuStar, label: "Total Points", value: player.totalPoints.toString() },
-    { icon: LuActivity, label: "Points / Match (PPM)", value: player.pointsPerMatch.toFixed(1) },
-    { icon: LuGem, label: "Points / £Million", value: player.pointsPerMillion.toFixed(1) },
-    { icon: LuGauge, label: "PPM / £Million", value: player.pointsPerMatchPerMil.toString() },
-    { icon: LuChartBarIncreasing, label: "ICT Index", value: player.ictIndex.toString() },
+    { icon: LuStar, label: "Total Points", value: player.total_points.toString() },
+    { icon: LuActivity, label: "Points / Match (PPM)", value: player.points_per_game.toFixed(1) },
+    { icon: LuGem, label: "Points / £Million", value: player.points_per_million.toFixed(1) },
+    { icon: LuGauge, label: "PPM / £Million", value: player.points_per_game_per_million.toString() },
+    { icon: LuChartBarIncreasing, label: "ICT Index", value: player.ict_index.toString() },
   ];
 
   const disciplineAndAvailabilityStats: StatBoxProps[] = [
-    { icon: LuTriangleAlert, label: "Yellow Cards", value: player.yellowCards.toString() },
-    { icon: LuOctagonX, label: "Red Cards", value: player.redCards.toString() },
+    { icon: LuTriangleAlert, label: "Yellow Cards", value: player.yellow_cards.toString() },
+    { icon: LuOctagonX, label: "Red Cards", value: player.red_cards.toString() },
     { icon: LuClock, label: "Minutes Played", value: player.minutes.toString() },
     {
       icon: LuPercent,
@@ -219,7 +136,7 @@ export const PlayerPage = ({ playerId, allPlayers, onBack }: PlayerPageProps) =>
 
   if (loading) {
     return (
-      <PlayerPageLayout onBack={onBack} header={`${player.firstName} ${player.lastName}`}>
+      <PlayerPageLayout onBack={onBack} header={`${player.first_name} ${player.second_name}`}>
         <div className="flex flex-1 items-center justify-center">
           <LuLoader size={48} className="animate-spin" />
         </div>
@@ -228,10 +145,10 @@ export const PlayerPage = ({ playerId, allPlayers, onBack }: PlayerPageProps) =>
   }
 
   return (
-    <PlayerPageLayout onBack={onBack} header={`${player.firstName} ${player.lastName}`}>
+    <PlayerPageLayout onBack={onBack} header={`${player.first_name} ${player.second_name}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <Badge teamColour={player.teamShort.toLowerCase()} text={player.teamName} border />
-        {getPositionBadge({ position: player.positionShort, hasBorder: true, hasIcon: true, longPosName: true })}
+        <Badge teamColour={player.team_short.toLowerCase()} text={player.team_name} border />
+        {getPositionBadge({ position: player.position_short, hasBorder: true, hasIcon: true, longPosName: true })}
         {getStatusBadge(player.status)}
       </div>
 
@@ -247,8 +164,8 @@ export const PlayerPage = ({ playerId, allPlayers, onBack }: PlayerPageProps) =>
         <StatSection sectionTitle="Cost & Contribution" stats={costAndContributionStats} />
         <StatSection sectionTitle="Discipline & Availability" stats={disciplineAndAvailabilityStats} />
         <StatSection
-          sectionTitle={`${player.positionName} Statistics`}
-          stats={getPositionSpecificStats(player.positionShort)}
+          sectionTitle={`${player.position_name} Statistics`}
+          stats={getPositionSpecificStats(player.position_short, player)}
         />
       </div>
     </PlayerPageLayout>

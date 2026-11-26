@@ -48,7 +48,6 @@ const accentClasses: Record<
   },
 };
 
-// TODO: styling
 export const FilterSlider: React.FC<FilterSliderProps> = ({
   state,
   stateCallback,

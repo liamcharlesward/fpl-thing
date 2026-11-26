@@ -1,21 +1,15 @@
 import { useState, useEffect, useMemo } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useMatch } from "react-router-dom";
 import "./App.css";
-import { Filters } from "./components/Filters";
-import { PlayerScatterChart } from "./components/PlayerScatterChart";
-import { PlayerTable } from "./components/PlayerTable";
 import type { SortField, SortDirection } from "./components/PlayerTable";
 import { fetchBootstrapData } from "./services/FplBootstrapService";
 import type { ProcessedPlayer } from "./services/FplBootstrapService";
 import type { FplTeam, FplElementType } from "./services/FplBootstrapService";
+import { DashboardPage } from "./pages/DashboardPage";
 import { PlayerPage } from "./pages/PlayerPage";
-import { Card } from "./components/Card";
-import { LuLoader, LuTriangleAlert, LuFilter, LuSearch, LuDiff, LuGauge } from "react-icons/lu";
-import { GiSoccerBall } from "react-icons/gi";
-import { Popover } from "radix-ui";
-import { Button } from "./components/Button";
+import { LuLoader, LuTriangleAlert } from "react-icons/lu";
 
-function AppContent() {
+const AppContent = () => {
   const navigate = useNavigate();
   const playerMatch = useMatch("/player/:id");
   const routePlayerId = playerMatch?.params.id ? Number(playerMatch.params.id) : null;
@@ -37,7 +31,7 @@ function AppContent() {
   const [maxPrice, setMaxPrice] = useState(16.0);
 
   // Sorting States
-  const [sortField, setSortField] = useState<SortField>("pointsPerMatchPerMil");
+  const [sortField, setSortField] = useState<SortField>("points_per_game_per_million");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   const routePlayer = useMemo(() => {
@@ -79,7 +73,7 @@ function AppContent() {
 
   const maxPointsInDataset = useMemo(() => {
     if (players.length === 0) return 3420;
-    return Math.max(...players.map((p) => p.totalPoints), 1);
+    return Math.max(...players.map((p) => p.total_points), 1);
   }, [players]);
 
   const maxPriceInDataset = useMemo(() => {
@@ -113,18 +107,18 @@ function AppContent() {
       // Name search
       const nameMatch =
         search.trim() === "" ||
-        player.webName.toLowerCase().includes(search.toLowerCase()) ||
-        player.firstName.toLowerCase().includes(search.toLowerCase()) ||
-        player.lastName.toLowerCase().includes(search.toLowerCase());
+        player.web_name.toLowerCase().includes(search.toLowerCase()) ||
+        player.first_name.toLowerCase().includes(search.toLowerCase()) ||
+        player.second_name.toLowerCase().includes(search.toLowerCase());
 
       // Team filter
-      const teamMatch = selectedTeams.includes(player.teamId);
+      const teamMatch = selectedTeams.includes(player.team);
 
       // Position filter
-      const posMatch = selectedPositions.includes(player.positionId);
+      const posMatch = selectedPositions.includes(player.position_id);
 
       // Points filter
-      const pointsMatch = player.totalPoints >= minPoints;
+      const pointsMatch = player.total_points >= minPoints;
 
       // Minutes filter
       const minMatch = player.minutes >= minMinutes;
@@ -187,118 +181,40 @@ function AppContent() {
     );
   }
 
-  const dashboardView = (
-    <div className="min-h-screen bg-slate-950 py-5 text-slate-100 px-4">
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-4">
-        {/* Header  */}
-        <header className="rounded-2xl border border-slate-700/80 bg-slate-900/85 p-5 shadow-[0_12px_34px_rgba(15,23,42,0.45)] backdrop-blur-sm items-center flex flex-row justify-between">
-          {/* Left-hand side */}
-          <div className="flex flex-1 flex-row h-full items-center">
-            <h1>FPL StatViewer</h1>
-            <div className="flex flex-1 ml-4 pl-4 border-l border-slate-700/70">
-              <div className="flex flex-1 items-center gap-4 rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-2.5">
-                <LuSearch size={16} className="text-slate-400" />
-                <input
-                  type="text"
-                  className="w-full border-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
-                  placeholder="Search player name..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-          {/* Right-hand side */}
-          <div className="flex h-full flex-row gap-4 ml-4 pl-4 border-l border-slate-700/70">
-            {/* Filters */}
-            <Popover.Root>
-              <Popover.Trigger asChild>
-                <Button>
-                  <LuFilter size={16} />
-                  <span>Filters</span>
-                </Button>
-              </Popover.Trigger>
-              <Popover.Portal>
-                <Popover.Content sideOffset={8} align="end" className="z-10">
-                  <Filters
-                    selectedTeams={selectedTeams}
-                    setSelectedTeams={setSelectedTeams}
-                    selectedPositions={selectedPositions}
-                    setSelectedPositions={setSelectedPositions}
-                    minMinutes={minMinutes}
-                    setMinMinutes={setMinMinutes}
-                    minPoints={minPoints}
-                    setMinPoints={setMinPoints}
-                    maxPrice={maxPrice}
-                    setMaxPrice={setMaxPrice}
-                    teams={teams}
-                    positions={positions}
-                    onReset={handleResetFilters}
-                    maxMinutesAvailable={maxMinutesInDataset}
-                    highestPriceAvailable={maxPriceInDataset}
-                    maxPointsAvailable={maxPointsInDataset}
-                  />
-                </Popover.Content>
-              </Popover.Portal>
-            </Popover.Root>
-          </div>
-        </header>
-
-        {/* Main Grid: Visuals and Detail */}
-        <div className="grid gap-4 xl:grid-cols-2">
-          {/* Left Column: Visual Graph */}
-          {/* TODO: Componentise graphs */}
-          <div className="flex flex-col gap-y-4">
-            <Card
-              headerIcon={LuGauge}
-              title="Player Value"
-              subtitle="Players in the top left (high points per match, low cost) demonstrate best value for money."
-            >
-              <PlayerScatterChart
-                players={filteredPlayers}
-                selectedPlayer={routePlayer}
-                onSelectPlayer={(player) => navigate(`/player/${player.id}`)}
-                xAxisMetric="cost"
-                xAxisLabel="Player Price (£m)"
-                yAxisMetric="pointsPerMatch"
-                yAxisLabel="Points per Match (PPM)"
-              />
-            </Card>
-            <Card
-              headerIcon={LuDiff}
-              title="Differentials"
-              subtitle="Players in the top left (high points scored, low selection) are most likely to make a difference in your league."
-            >
-              <PlayerScatterChart
-                players={filteredPlayers}
-                selectedPlayer={routePlayer}
-                onSelectPlayer={(player) => navigate(`/player/${player.id}`)}
-                yAxisMetric="totalPoints"
-                yAxisLabel="Total Points Scored"
-                xAxisMetric="selectedByPercent"
-                xAxisLabel="Selected (%)"
-              />
-            </Card>
-          </div>
-
-          <Card headerIcon={GiSoccerBall} title="Player Leaderboard">
-            <PlayerTable
-              players={sortedPlayers}
-              selectedPlayer={routePlayer}
-              onSelectPlayer={(player) => navigate(`/player/${player.id}`)}
-              sortField={sortField}
-              sortDirection={sortDirection}
-              onSort={handleSort}
-            />
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <Routes>
-      <Route path="/" element={dashboardView} />
+      <Route
+        path="/"
+        element={
+          <DashboardPage
+            search={search}
+            setSearch={setSearch}
+            selectedTeams={selectedTeams}
+            setSelectedTeams={setSelectedTeams}
+            selectedPositions={selectedPositions}
+            setSelectedPositions={setSelectedPositions}
+            minMinutes={minMinutes}
+            setMinMinutes={setMinMinutes}
+            minPoints={minPoints}
+            setMinPoints={setMinPoints}
+            maxPrice={maxPrice}
+            setMaxPrice={setMaxPrice}
+            teams={teams}
+            positions={positions}
+            onResetFilters={handleResetFilters}
+            maxMinutesAvailable={maxMinutesInDataset}
+            highestPriceAvailable={maxPriceInDataset}
+            maxPointsAvailable={maxPointsInDataset}
+            filteredPlayers={filteredPlayers}
+            sortedPlayers={sortedPlayers}
+            routePlayer={routePlayer}
+            onSelectPlayer={(player) => navigate(`/player/${player.id}`)}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+          />
+        }
+      />
       <Route
         path="/player/:id"
         element={<PlayerPage playerId={routePlayerId} allPlayers={players} onBack={() => navigate("/")} />}
@@ -306,14 +222,14 @@ function AppContent() {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
-}
+};
 
-function App() {
+const App = () => {
   return (
     <BrowserRouter>
       <AppContent />
     </BrowserRouter>
   );
-}
+};
 
 export default App;

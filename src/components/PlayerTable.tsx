@@ -5,14 +5,15 @@ import { Badge } from "./Badge";
 import { getPositionBadge } from "../services/PlayerBadgeService";
 
 export type SortField =
-  | "webName"
-  | "teamShort"
-  | "positionShort"
-  | "pointsPerMatch"
-  | "totalPoints"
+  | "web_name"
+  | "team_short"
+  | "position_short"
   | "cost"
-  | "pointsPerMillion"
-  | "pointsPerMatchPerMil";
+  | "total_points"
+  | "points_per_game"
+  | "points_per_million"
+  | "points_per_game_per_million"
+  | "minutes";
 export type SortDirection = "asc" | "desc";
 
 const PAGE_SIZE = 25;
@@ -80,38 +81,41 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
             <table className="min-w-full border-separate border-spacing-0 text-left text-sm text-slate-200">
               <thead className="bg-slate-900/90 text-slate-400">
                 <tr>
-                  <th className="cursor-pointer px-3 py-3 font-medium" onClick={() => onSort("webName")}>
-                    Player {renderSortIcon("webName")}
+                  <th className="cursor-pointer px-3 py-3 font-medium" onClick={() => onSort("web_name")}>
+                    Player {renderSortIcon("web_name")}
                   </th>
-                  <th className="cursor-pointer px-3 py-3 font-medium" onClick={() => onSort("teamShort")}>
-                    Team {renderSortIcon("teamShort")}
+                  <th className="cursor-pointer px-3 py-3 font-medium" onClick={() => onSort("team_short")}>
+                    Team {renderSortIcon("team_short")}
                   </th>
-                  <th className="cursor-pointer px-3 py-3 font-medium" onClick={() => onSort("positionShort")}>
-                    Pos {renderSortIcon("positionShort")}
+                  <th className="cursor-pointer px-3 py-3 font-medium" onClick={() => onSort("position_short")}>
+                    Pos {renderSortIcon("position_short")}
                   </th>
                   <th
                     className="cursor-pointer px-3 py-3 text-right font-medium"
-                    onClick={() => onSort("pointsPerMatch")}
+                    onClick={() => onSort("points_per_game")}
                   >
-                    PPM {renderSortIcon("pointsPerMatch")}
+                    PPM {renderSortIcon("points_per_game")}
                   </th>
                   <th className="cursor-pointer px-3 py-3 text-right font-medium" onClick={() => onSort("cost")}>
                     Price {renderSortIcon("cost")}
                   </th>
-                  <th className="cursor-pointer px-3 py-3 text-right font-medium" onClick={() => onSort("totalPoints")}>
-                    Total {renderSortIcon("totalPoints")}
+                  <th
+                    className="cursor-pointer px-3 py-3 text-right font-medium"
+                    onClick={() => onSort("total_points")}
+                  >
+                    Total {renderSortIcon("total_points")}
                   </th>
                   <th
                     className="cursor-pointer px-3 py-3 text-right font-medium"
-                    onClick={() => onSort("pointsPerMillion")}
+                    onClick={() => onSort("points_per_million")}
                   >
-                    Pts/£m {renderSortIcon("pointsPerMillion")}
+                    Pts/£m {renderSortIcon("points_per_million")}
                   </th>
                   <th
                     className="cursor-pointer px-3 py-3 text-right font-medium"
-                    onClick={() => onSort("pointsPerMatchPerMil")}
+                    onClick={() => onSort("points_per_game_per_million")}
                   >
-                    PPM/£m {renderSortIcon("pointsPerMatchPerMil")}
+                    PPM/£m {renderSortIcon("points_per_game_per_million")}
                   </th>
                 </tr>
               </thead>
@@ -125,21 +129,21 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
                       onClick={() => onSelectPlayer(p)}
                     >
                       <td className="border-t border-slate-800 px-3 py-2.5 font-medium text-slate-100">
-                        {p.webName === p.lastName ? (
+                        {p.web_name === p.second_name ? (
                           <>
-                            {p.firstName} <span className="font-semibold">{p.lastName}</span>
+                            {p.first_name} <span className="font-semibold">{p.second_name}</span>
                           </>
                         ) : (
-                          p.webName
+                          p.web_name
                         )}
                       </td>
                       <td className="border-t border-slate-800 px-3 py-2.5">
-                        <Badge text={p.teamShort} teamColour={p.teamShort.toLowerCase()} />
+                        <Badge text={p.team_short} teamColour={p.team_short.toLowerCase()} />
                       </td>
                       <td className="border-t border-slate-800 px-3 py-2.5">
                         <span>
                           {getPositionBadge({
-                            position: p.positionShort,
+                            position: p.position_short,
                             hasBorder: true,
                             hasIcon: false,
                             longPosName: false,
@@ -147,19 +151,19 @@ export const PlayerTable: React.FC<PlayerTableProps> = ({
                         </span>
                       </td>
                       <td className="border-t border-slate-800 px-3 py-2.5 text-right font-semibold text-cyan-300">
-                        {p.pointsPerMatch.toFixed(1)}
+                        {p.points_per_game.toFixed(1)}
                       </td>
                       <td className="border-t border-slate-800 px-3 py-2.5 text-right font-medium text-slate-200">
                         £{p.cost.toFixed(1)}m
                       </td>
                       <td className="border-t border-slate-800 px-3 py-2.5 text-right text-slate-300">
-                        {p.totalPoints}
+                        {p.total_points}
                       </td>
                       <td className="border-t border-slate-800 px-3 py-2.5 text-right font-medium text-fuchsia-300">
-                        {p.pointsPerMillion.toFixed(1)}
+                        {p.points_per_million.toFixed(1)}
                       </td>
                       <td className="border-t border-slate-800 px-3 py-2.5 text-right font-medium text-fuchsia-300">
-                        {p.pointsPerMatchPerMil.toString()}
+                        {p.points_per_game_per_million.toString()}
                       </td>
                     </tr>
                   );

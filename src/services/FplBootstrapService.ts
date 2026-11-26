@@ -11,37 +11,105 @@ export interface FplElementType {
   singular_name_short: string;
 }
 
+// TODO: Trim unneccessary fields
 export interface FplElement {
-  id: number;
-  first_name: string;
-  second_name: string;
-  web_name: string;
-  team: number;
+  price_change_locked_until: number | null;
+  price_change_calibrating: boolean;
+  dreamteam_count: number;
   element_type: number;
-  points_per_game: string;
-  total_points: number;
+  ep_next: string;
+  ep_this: string;
+  event_points: number;
+  first_name: string;
+  form: string;
+  id: number;
+  in_dreamteam: boolean;
+  news: string;
+  news_added: string | null;
   now_cost: number;
+  photo: string;
+  points_per_game: string;
+  removed: boolean;
+  second_name: string;
+  selected_by_percent: string;
+  special: boolean;
+  squad_number: number | null;
+  status: string;
+  team: number;
+  team_code: number;
+  total_points: number;
+  transfers_in: number;
+  transfers_in_event: number;
+  transfers_out: number;
+  transfers_out_event: number;
+  value_form: string;
+  value_season: string;
+  web_name: string;
+  known_name: string;
+  region: number;
+  team_join_date: string;
+  birth_date: string;
+  has_temporary_code: boolean;
+  opta_code: string;
   minutes: number;
   goals_scored: number;
   assists: number;
   clean_sheets: number;
+  goals_conceded: number;
+  own_goals: number;
+  penalties_saved: number;
+  penalties_missed: number;
   yellow_cards: number;
   red_cards: number;
-  selected_by_percent: string;
-  status: string;
-  news: string;
+  saves: number;
+  bonus: number;
+  bps: number;
   influence: string;
   creativity: string;
   threat: string;
   ict_index: string;
-  starts: number;
   clearances_blocks_interceptions: number;
   recoveries: number;
   tackles: number;
   defensive_contribution: number;
-  goals_conceded: number;
-  expected_goals_conceded: number;
-  saves: number;
+  starts: number;
+  expected_goals: string;
+  expected_assists: string;
+  expected_goal_involvements: string;
+  expected_goals_conceded: string;
+  corners_and_indirect_freekicks_order: number | null;
+  corners_and_indirect_freekicks_text: string;
+  direct_freekicks_order: number | null;
+  direct_freekicks_text: string;
+  penalties_order: number | null;
+  penalties_text: string;
+  scout_risks: string[];
+  scout_news_link: string;
+  influence_rank: number;
+  influence_rank_type: number;
+  creativity_rank: number;
+  creativity_rank_type: number;
+  threat_rank: number;
+  threat_rank_type: number;
+  ict_index_rank: number;
+  ict_index_rank_type: number;
+  expected_goals_per_90: number;
+  saves_per_90: number;
+  expected_assists_per_90: number;
+  expected_goal_involvements_per_90: number;
+  expected_goals_conceded_per_90: number;
+  goals_conceded_per_90: number;
+  now_cost_rank: number;
+  now_cost_rank_type: number;
+  form_rank: number;
+  form_rank_type: number;
+  points_per_game_rank: number;
+  points_per_game_rank_type: number;
+  selected_rank: number;
+  selected_rank_type: number;
+  starts_per_90: number;
+  clean_sheets_per_90: number;
+  defensive_contribution_per_90: number;
 }
 
 export interface FplBootstrapData {
@@ -50,40 +118,19 @@ export interface FplBootstrapData {
   elements: FplElement[];
 }
 
-export interface ProcessedPlayer {
-  id: number;
-  firstName: string;
-  lastName: string;
-  webName: string;
-  teamId: number;
-  teamName: string;
-  teamShort: string;
-  positionId: number;
-  positionName: string;
-  positionShort: string;
-  pointsPerMatch: number;
-  totalPoints: number;
-  cost: number; // in Millions, e.g. 15.2
-  minutes: number;
-  goals: number;
-  assists: number;
-  cleanSheets: number;
-  yellowCards: number;
-  redCards: number;
-  selectedByPercent: number;
-  status: string;
-  news: string;
-  ictIndex: number;
-  pointsPerMillion: number;
-  pointsPerMatchPerMil: number;
-  starts: number;
-  clearancesBlocksInterceptions: number;
-  recoveries: number;
-  tackles: number;
-  defensiveContribution: number;
-  goalsConceded: number;
-  expectedGoalsConceded: number;
-  saves: number;
+export interface ProcessedPlayer
+  extends Omit<FplElement, 'points_per_game' | 'selected_by_percent' | 'ict_index'> {
+  cost: number;
+  points_per_game: number;
+  selected_by_percent: number;
+  ict_index: number;
+  points_per_million: number;
+  points_per_game_per_million: number;
+  team_name: string;
+  team_short: string;
+  position_id: number;
+  position_name: string;
+  position_short: string;
 }
 
 export interface FplDataResult {
@@ -124,43 +171,20 @@ export async function fetchBootstrapData(): Promise<FplDataResult> {
     const position = positionMap.get(el.element_type);
     const cost = el.now_cost / 10;
     const pointsPerMatch = parseFloat(el.points_per_game) || 0;
-    const pointsPerMillion = cost > 0 ? Math.round((el.total_points / cost) * 100) / 100 : 0;
-    const pointsPerMatchPerMil = Math.round(((pointsPerMatch / cost) + Number.EPSILON) * 1000) / 1000;
 
     return {
-      id: el.id,
-      firstName: el.first_name,
-      lastName: el.second_name,
-      webName: el.web_name,
-      teamId: el.team,
-      teamName: team ? team.name : 'Unknown',
-      teamShort: team ? team.short_name : 'UNK',
-      positionId: el.element_type,
-      positionName: position ? position.singular_name : 'Unknown',
-      positionShort: position ? position.singular_name_short : 'UNK',
-      pointsPerMatch,
-      totalPoints: el.total_points,
-      cost,
-      minutes: el.minutes,
-      goals: el.goals_scored,
-      assists: el.assists,
-      cleanSheets: el.clean_sheets,
-      yellowCards: el.yellow_cards,
-      redCards: el.red_cards,
-      selectedByPercent: parseFloat(el.selected_by_percent) || 0,
-      status: el.status,
-      news: el.news,
-      ictIndex: parseFloat(el.ict_index) || 0,
-      pointsPerMillion,
-      pointsPerMatchPerMil,
-      starts: el.starts,
-      clearancesBlocksInterceptions: el.clearances_blocks_interceptions,
-      recoveries: el.recoveries,
-      tackles: el.tackles,
-      defensiveContribution: el.defensive_contribution,
-      goalsConceded: el.goals_conceded,
-      expectedGoalsConceded: el.expected_goals_conceded,
-      saves: el.saves
+      ...el,
+      team_name: team ? team.name : 'Unknown',
+      team_short: team ? team.short_name : 'UNK',
+      position_id: position.id,
+      position_name: position ? position.singular_name : 'Unknown',
+      position_short: position ? position.singular_name_short : 'UNK',
+      cost: cost,
+      points_per_game: pointsPerMatch,
+      points_per_million: cost > 0 ? Math.round((el.total_points / cost) * 100) / 100 : 0,
+      points_per_game_per_million: Math.round(((pointsPerMatch / cost) + Number.EPSILON) * 1000) / 1000,
+      selected_by_percent: parseFloat(el.selected_by_percent) || 0,
+      ict_index: parseFloat(el.ict_index) || 0,
     };
   });
 
